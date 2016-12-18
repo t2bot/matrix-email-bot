@@ -1,0 +1,13 @@
+{
+  "name": "matrix-email-bot",
+  "version": "1.0.0",
+  "dependencies": {
+    "config": "^1.24.0",
+    "express": "^4.14.0",
+    "mailin": "^3.0.3",
+    "matrix-js-sdk": "^0.7.2",
+    "pug": "^0.1.0",
+    "sqlite3": "^3.1.8",
+    "uuid": "^3.0.1"
+  }
+}

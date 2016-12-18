@@ -1,0 +1,23 @@
+{
+  "matrix": {
+    "homeserver_url": "https://t2bot.io",
+    "access_token": "YOUR_TOKEN_HERE",
+    "user_id": "@email:t2bot.io"
+  },
+  "mail": {
+    "port": 25,
+    "domain": "email.t2bot.io"
+  },
+  "rules": {
+    "!ooXDTgcuwbbtVkAEJL:t2bot.io": {
+      "allow_from": ["my_personal_email@gmail.com"]
+    }
+  },
+  "media": {
+    "url_format": "https://email.t2bot.io/m/$id"
+  },
+  "web": {
+    "port": 3000,
+    "bind": "127.0.0.1"
+  }
+}
