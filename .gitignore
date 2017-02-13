@@ -1,5 +1,8 @@
 .idea
 
+db/*.db
+start.sh
+
 # app
 config/production.json
 config/development.json
