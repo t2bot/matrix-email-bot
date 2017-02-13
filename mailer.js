@@ -42,7 +42,7 @@ mailin.on('message', function (connection, data, content) {
           var skip = true;
           for (var j = 0; j < data.from.length; j++) {
             var fEmail = data.from[j].address;
-            if (ruleConf.allow_from.indexOf(fEmail) !== -1) {
+            if (ruleConf.allow_from.indexOf(fEmail) !== -1 && ruleConf.allow_from.length > 0) {
               skip = false;
               break;
             }

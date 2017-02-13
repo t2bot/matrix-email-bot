@@ -6,7 +6,7 @@ A bot that posts messages to rooms when an email is received. Ideal for uses whe
 *Note*: Currently this is in the early stages of development and is therefore somewhat restricted in what is possible. Future enhancements are planned to make this easier to use and set up.
 
 1. Invite `@email:t2bot.io` to your [Matrix](https://matrix.org) room.
-2. Get your room's internal ID (for instance, `!ooXDTgcuwbbtVkAEJL:t2bot.io`).
+2. Get your room's internal ID (for instance, `!ooXDTgcuwbbtVkAEJL:t2bot.io` which is `#test:t2bot.io`).
 3. Contact `@travis:t2l.io` to set the appropriate `allow_from` rule for your room. (*This is a temporary step until [#1](https://github.com/turt2live/matrix-email-bot/issues/1) is implemented*)
 4. Send an email to `<room id without !>_<domain>@email.t2bot.io` (eg: `ooXDTgcuwbbtVkAEJL_t2bot.io@email.t2bot.io`).
 5. See the message the bot posts (this may take a while depending on system load).
