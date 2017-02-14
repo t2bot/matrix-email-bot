@@ -43,18 +43,18 @@ mailin.on('message', function (connection, data, content) {
                     var ruleConf = config.rules[roomId];
 
                     var allowedSenders = ruleConf.allow_from;
-                    if(!allowedSenders) allowedSenders = config.room_defaults.allow_from || [];
+                    if (!allowedSenders) allowedSenders = config.room_defaults.allow_from || [];
 
                     var blockedSenders = ruleConf.deny_from;
-                    if(!blockedSenders) blockedSenders = config.room_defaults.deny_from || [];
+                    if (!blockedSenders) blockedSenders = config.room_defaults.deny_from || [];
 
                     // Check allowance first
                     var isAllowed = false;
-                    if(allowedSenders.length > 0){
+                    if (allowedSenders.length > 0) {
                         for (var j = 0; j < data.from.length; j++) {
                             var fEmail = data.from[j].address;
                             if (allowedSenders.indexOf(fEmail) !== -1) {
-                                log.info("mailer", "Sender " + fEmail+ " is allowed to send to room " + roomId);
+                                log.info("mailer", "Sender " + fEmail + " is allowed to send to room " + roomId);
                                 isAllowed = true;
                                 break;
                             } else {
@@ -68,18 +68,18 @@ mailin.on('message', function (connection, data, content) {
 
 
                     // Now check if they are banned/denied from sending
-                    if(isAllowed) {
+                    if (isAllowed) {
                         for (var j = 0; j < data.from.length; j++) {
                             var fEmail = data.from[j].address;
                             if (blockedSenders.indexOf(fEmail) !== -1) {
-                                log.info("mailer", "Sender " + fEmail+ " is NOT allowed to send to room (blacklisted): " + roomId);
+                                log.info("mailer", "Sender " + fEmail + " is NOT allowed to send to room (blacklisted): " + roomId);
                                 isAllowed = false;
                                 break;
                             }
                         }
                     }
 
-                    if (!isAllowed){
+                    if (!isAllowed) {
                         // TODO: Notify sender of failure?
                         log.info("mailer", "Skipping email: From address not permitted to send to room " + roomId);
                         continue;
@@ -93,16 +93,16 @@ mailin.on('message', function (connection, data, content) {
 
                 var roomOptions = config.rules[roomId];
                 var skipDb = config.room_defaults.skip_db;
-                if(roomOptions.skip_db !== undefined) {
+                if (roomOptions.skip_db !== undefined) {
                     skipDb = roomOptions.skip_db;
                 }
 
                 var msg = db.prepareMessage(emailId, fromEmail, fromName, toEmail, toName, subject, body, isHtml);
-                if(!skipDb) {
+                if (!skipDb) {
                     var id = db.writeMessage(msg);
                     log.info("mailer", "Message saved as message " + id);
-                    db.getMessage(id, function(msg) {
-                       matrix.postMessageToRoom(msg, roomId);
+                    db.getMessage(id, function (msg) {
+                        matrix.postMessageToRoom(msg, roomId);
                     });
                 } else {
                     log.info("mailer", "Message skipped database: posting to room as-is");
