@@ -10,14 +10,16 @@
   },
   "rules": {
     "!ooXDTgcuwbbtVkAEJL:t2bot.io": {
-      "allow_from": ["my_personal_email@gmail.com"]
+      "allow_from": ["my_personal_email@gmail.com"],
+      "message_format": "$subject: <a href='https://email.t2bot.io/m/$id'>Click to view</a>"
     }
   },
-  "media": {
-    "url_format": "https://email.t2bot.io/m/$id"
+  "room_defaults": {
+    "allow_from": [],
+    "message_format": "$subject: <a href='https://email.t2bot.io/m/$id'>Click to view</a>"
   },
   "web": {
     "port": 3000,
-    "bind": "127.0.0.1"
+    "bind_ip": "127.0.0.1"
   }
 }

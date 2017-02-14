@@ -1,5 +1,6 @@
 var sdk = require('matrix-js-sdk');
 var config = require("config");
+var striptags = require("striptags");
 
 var roomList = [];
 var client = null;
@@ -51,10 +52,20 @@ function postMessageToRoom(message, roomId) {
   if (roomList.indexOf(roomId) === -1) {
     return; // do not post - not in room
   }
+
+  var msgFormat = config.rules[roomId].message_format;
+  if(!msgFormat) msgFormat = config.room_defaults.message_format;
+  if(!msgFormat) msgFormat = "Configuration error: No message format set for room.";
+
+  var mtxMessage = msgFormat.toString();
+  for(var property in message) {
+    mtxMessage = mtxMessage.replace("$" + property, message[property]);
+  }
+
   var mtxContent = {
-    body: message.subject + ": " + message.url,
+    body: striptags(mtxMessage),
     msgtype: "m.text",
-    formatted_body: "<p>" + message.subject + ": <a href='" + message.url + "'>Click to view</a></p>",
+    formatted_body: mtxMessage,
     format: "org.matrix.custom.html"
   };
   client.sendMessage(roomId, mtxContent);
