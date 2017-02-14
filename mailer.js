@@ -1,5 +1,6 @@
 var mailin = require("mailin");
 var config = require("config");
+var log = require("npmlog");
 var matrix = require("./matrix");
 var db = require("./database");
 
@@ -36,6 +37,7 @@ mailin.on('message', function (connection, data, content) {
                 // TODO: Should this reply back? Configuration option?
 
                 var roomId = "!" + parts.shift() + ":" + parts.join("_");
+                log.info("mailer", "Email received for room " + roomId);
 
                 if (config.rules[roomId]) {
                     var ruleConf = config.rules[roomId];
@@ -44,23 +46,36 @@ mailin.on('message', function (connection, data, content) {
                         for (var j = 0; j < data.from.length; j++) {
                             var fEmail = data.from[j].address;
                             if (ruleConf.allow_from.indexOf(fEmail) !== -1) {
+                                log.info("mailer", "Sender " + fEmail+ " is allowed to send to room " + roomId);
                                 skip = false;
                                 break;
+                            } else {
+                                log.info("mailer", "Sender " + fEmail + " is not allowed to send to room " + roomId);
                             }
                         }
-                    } else skip = false; // don't skip if there's no configured addresses
-                    if (skip) continue; // TODO: Notify of failure?
-                } else continue; // no rules = no sending
+                    } else {
+                        log.info("mailer", "No allow_from rules to process - permitting message");
+                        skip = false; // don't skip if there's no configured addresses
+                    }
+                    if (skip){
+                        // TODO: Notify sender of failure?
+                        log.info("mailer", "Skipping email: From address not permitted to send to room " + roomId);
+                        continue;
+                    }
+                } else {
+                    // TODO: Notify sender of failure?
+                    log.info("mailer", "Skipping email: No configuration for room " + roomId);
+                    continue;
+                }
 
                 var id = db.writeMessage(emailId, fromEmail, fromName, toEmail, toName, subject, body, isHtml);
 
-                var url = config.get("media.url_format").replace("$id", id);
                 db.getMessage(id, function (msg) {
                     if (!msg) return;
-                    msg["url"] = url;
-
                     matrix.postMessageToRoom(msg, roomId);
                 });
+            } else {
+                log.info("mailer", "Skipping email to " + toEmail + " - invalid domain (check your MX records or configuration)");
             }
         }
     });
