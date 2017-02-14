@@ -90,12 +90,24 @@ mailin.on('message', function (connection, data, content) {
                     continue;
                 }
 
-                var id = db.writeMessage(emailId, fromEmail, fromName, toEmail, toName, subject, body, isHtml);
 
-                db.getMessage(id, function (msg) {
-                    if (!msg) return;
+                var roomOptions = config.rules[roomId];
+                var skipDb = config.room_defaults.skip_db;
+                if(roomOptions.skip_db !== undefined) {
+                    skipDb = roomOptions.skip_db;
+                }
+
+                var msg = db.prepareMessage(emailId, fromEmail, fromName, toEmail, toName, subject, body, isHtml);
+                if(!skipDb) {
+                    var id = db.writeMessage(msg);
+                    log.info("mailer", "Message saved as message " + id);
+                    db.getMessage(id, function(msg) {
+                       matrix.postMessageToRoom(msg, roomId);
+                    });
+                } else {
+                    log.info("mailer", "Message skipped database: posting to room as-is");
                     matrix.postMessageToRoom(msg, roomId);
-                });
+                }
             } else {
                 log.info("mailer", "Skipping email to " + toEmail + " - invalid domain (check your MX records or configuration)");
             }
