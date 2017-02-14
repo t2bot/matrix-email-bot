@@ -97,7 +97,7 @@ mailin.on('message', function (connection, data, content) {
                     skipDb = roomOptions.skip_db;
                 }
 
-                var msg = db.prepareMessage(emailId, fromEmail, fromName, toEmail, toName, subject, body, isHtml);
+                var msg = db.prepareMessage(emailId, fromEmail, fromName, toEmail, toName, subject, body, isHtml, roomId);
                 if (!skipDb) {
                     var id = db.writeMessage(msg);
                     log.info("mailer", "Message saved as message " + id);
