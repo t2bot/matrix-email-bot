@@ -11,11 +11,13 @@
   "rules": {
     "!ooXDTgcuwbbtVkAEJL:t2bot.io": {
       "allow_from": ["my_personal_email@gmail.com"],
+      "deny_from": ["that_guy@gmail.com"],
       "message_format": "$subject: <a href='https://email.t2bot.io/m/$id'>Click to view</a>"
     }
   },
   "room_defaults": {
     "allow_from": [],
+    "deny_from": [],
     "message_format": "$subject: <a href='https://email.t2bot.io/m/$id'>Click to view</a>"
   },
   "web": {

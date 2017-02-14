@@ -41,23 +41,45 @@ mailin.on('message', function (connection, data, content) {
 
                 if (config.rules[roomId]) {
                     var ruleConf = config.rules[roomId];
-                    var skip = true;
-                    if (ruleConf.allow_from.length > 0) {
+
+                    var allowedSenders = ruleConf.allow_from;
+                    if(!allowedSenders) allowedSenders = config.room_defaults.allow_from || [];
+
+                    var blockedSenders = ruleConf.deny_from;
+                    if(!blockedSenders) blockedSenders = config.room_defaults.deny_from || [];
+
+                    // Check allowance first
+                    var isAllowed = false;
+                    if(allowedSenders.length > 0){
                         for (var j = 0; j < data.from.length; j++) {
                             var fEmail = data.from[j].address;
-                            if (ruleConf.allow_from.indexOf(fEmail) !== -1) {
+                            if (allowedSenders.indexOf(fEmail) !== -1) {
                                 log.info("mailer", "Sender " + fEmail+ " is allowed to send to room " + roomId);
-                                skip = false;
+                                isAllowed = true;
                                 break;
                             } else {
-                                log.info("mailer", "Sender " + fEmail + " is not allowed to send to room " + roomId);
+                                log.info("mailer", "Sender " + fEmail + " is not on whitelist for room " + roomId);
                             }
                         }
                     } else {
-                        log.info("mailer", "No allow_from rules to process - permitting message");
-                        skip = false; // don't skip if there's no configured addresses
+                        log.info("mailer", "No allowed senders configured for room " + roomId);
+                        isAllowed = true;
                     }
-                    if (skip){
+
+
+                    // Now check if they are banned/denied from sending
+                    if(isAllowed) {
+                        for (var j = 0; j < data.from.length; j++) {
+                            var fEmail = data.from[j].address;
+                            if (blockedSenders.indexOf(fEmail) !== -1) {
+                                log.info("mailer", "Sender " + fEmail+ " is NOT allowed to send to room (blacklisted): " + roomId);
+                                isAllowed = false;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!isAllowed){
                         // TODO: Notify sender of failure?
                         log.info("mailer", "Skipping email: From address not permitted to send to room " + roomId);
                         continue;
