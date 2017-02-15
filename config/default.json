@@ -8,6 +8,9 @@
     "port": 25,
     "domain": "email.t2bot.io"
   },
+  "custom_targets": {
+    "myemail@domain.com": "!ooXDTgcuwbbtVkAEJL:t2bot.io"
+  },
   "rules": {
     "!ooXDTgcuwbbtVkAEJL:t2bot.io": {
       "allow_from": ["my_personal_email@gmail.com"],

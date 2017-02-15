@@ -50,12 +50,20 @@ mailin.on('message', function (connection, data, content) {
             var toEmail = to.address;
             var toName = to.name;
 
-            if (toEmail.endsWith('@' + config.get('mail.domain'))) {
-                var parts = toEmail.split('@')[0].split('_');
-                if (parts.length < 2) continue; // Invalid email address
-                // TODO: Should this reply back? Configuration option?
+            var mappedRoomId = null;
+            if(config.custom_targets[toEmail])
+                mappedRoomId = config.custom_targets[toEmail];
 
-                var roomId = "!" + parts.shift() + ":" + parts.join("_");
+            if (toEmail.endsWith('@' + config.get('mail.domain')) || mappedRoomId) {
+                var roomId = null;
+                if(!mappedRoomId) {
+                    var parts = toEmail.split('@')[0].split('_');
+                    if (parts.length < 2) continue; // Invalid email address
+                    // TODO: Should this reply back? Configuration option?
+
+                    roomId = "!" + parts.shift() + ":" + parts.join("_");
+                } else roomId = mappedRoomId;
+
                 log.info("mailer", "Email received for room " + roomId);
 
                 if (sentToRooms.indexOf(roomId) !== -1) {
