@@ -14,14 +14,18 @@
       "deny_from": ["that_guy@gmail.com"],
       "message_format": "$subject: <a href='https://email.t2bot.io/m/$id'>Click to view</a>",
       "skip_db": false,
-      "delete_key": "YOUR_SECRET_KEY_HERE"
+      "delete_key": "YOUR_SECRET_KEY_HERE",
+      "allow_cc_senders": true,
+      "allow_bcc_senders": true
     }
   },
   "room_defaults": {
     "allow_from": [],
     "deny_from": [],
     "message_format": "$subject: <a href='https://email.t2bot.io/m/$id'>Click to view</a>",
-    "skip_db": false
+    "skip_db": false,
+    "allow_cc_senders": true,
+    "allow_bcc_senders": true
   },
   "web": {
     "port": 3000,

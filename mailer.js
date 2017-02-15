@@ -15,7 +15,9 @@ mailin.on('message', function (connection, data, content) {
     db.hasEmailMessage(data.messageId, function (present) {
         if (present) return; // already processed
 
-        var allTo = data.to;
+        var allTo = data.to || [];
+        var allCc = data.cc || [];
+        var allBcc = data.bcc || [];
         var primaryFrom = data.from[0];
 
         var emailId = data.messageId;
@@ -25,8 +27,25 @@ mailin.on('message', function (connection, data, content) {
         var body = data.html;
         var isHtml = true; // TODO: Actually detect this
 
+        // Combine all the targets to get a list of addresses the email was sent to
+        var targets = [];
         for (var i = 0; i < allTo.length; i++) {
-            var to = allTo[i];
+            targets.push(allTo[i]);
+            allTo[i].source = "to";
+        }
+        for (var i = 0; i < allCc.length; i++) {
+            targets.push(allCc[i]);
+            allCc[i].source = "cc";
+        }
+        for (var i = 0; i < allBcc.length; i++) {
+            targets.push(allBcc[i]);
+            allBcc[i].source = "bcc";
+        }
+
+        var sentToRooms = [];
+        for (var i = 0; i < targets.length; i++) {
+            var to = targets[i];
+            if (!to.address) continue; // no address - no processing
 
             var toEmail = to.address;
             var toName = to.name;
@@ -39,6 +58,11 @@ mailin.on('message', function (connection, data, content) {
                 var roomId = "!" + parts.shift() + ":" + parts.join("_");
                 log.info("mailer", "Email received for room " + roomId);
 
+                if (sentToRooms.indexOf(roomId) !== -1) {
+                    log.info("mailer", "Skipping duplicate email for room: " + roomId);
+                    continue;
+                }
+
                 if (config.rules[roomId]) {
                     var ruleConf = config.rules[roomId];
 
@@ -47,6 +71,21 @@ mailin.on('message', function (connection, data, content) {
 
                     var blockedSenders = ruleConf.deny_from;
                     if (!blockedSenders) blockedSenders = config.room_defaults.deny_from || [];
+
+                    var allowCc = ruleConf.allow_cc_senders;
+                    if (allowCc === undefined) allowCc = config.room_defaults.allow_cc_senders;
+
+                    var allowBcc = ruleConf.allow_bcc_senders;
+                    if (allowBcc === undefined) allowBcc = config.room_defaults.allow_bcc_senders;
+
+                    if (to.source == "cc" && !allowCc) {
+                        log.info("mailer", "Skipping email for room (cc is not allowed) " + roomId);
+                        continue;
+                    }
+                    if (to.source == "bcc" && !allowBccc) {
+                        log.info("mailer", "Skipping email for room (bcc is not allowed) " + roomId);
+                        continue;
+                    }
 
                     // Check allowance first
                     var isAllowed = false;
@@ -96,6 +135,8 @@ mailin.on('message', function (connection, data, content) {
                 if (roomOptions.skip_db !== undefined) {
                     skipDb = roomOptions.skip_db;
                 }
+
+                sentToRooms.push(roomId);
 
                 var msg = db.prepareMessage(emailId, fromEmail, fromName, toEmail, toName, subject, body, isHtml, roomId);
                 if (!skipDb) {
