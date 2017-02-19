@@ -1,0 +1,30 @@
+matrix:
+  homeserverUrl: "https://t2bot.io"
+  accessToken: "YOUR_TOKEN_HERE"
+  userId: "@email:t2bot.io"
+mail:
+  port: 25
+  domain: "email.t2bot.io"
+web:
+  port: 80
+  bindIp: '0.0.0.0'
+customMailTargets:
+  "myemail@domain.com":
+  - "!ooXDTgcuwbbtVkAEJL:t2bot.io"
+defaultRoomConfig:
+  allowFromAnyone: true
+  allowedSenders: []
+  blockedSenders: []
+  skipDatabase: false
+  useCcAsTarget: true
+  useBccAsTarget: true
+  useToAsTarget: true
+  plaintextOnly: false
+  messageFormat: "$subject: <a href='https://email.t2bot.io/m/$id'>Click to view</a>"
+roomConfigs:
+  "!ooXDTgcuwbbtVkAEJL:t2bot.io":
+    allowFromAnyone: false
+    allowedSenders:
+    - "myemail@domain.com"
+    blockedSenders:
+    - "that_guy@domain.com"

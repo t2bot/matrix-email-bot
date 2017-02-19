@@ -1,11 +1,16 @@
 .idea
 
 db/*.db
+db/*.db-journal
 start.sh
+
+.tmp
 
 # app
 config/production.json
 config/development.json
+config/production.yaml
+config/development.yaml
 
 # Logs
 logs

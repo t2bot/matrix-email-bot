@@ -22,10 +22,10 @@ Currently matrix-email-bot is a single application. Future plans include making 
 3. Enable spamassassin and spamc (`/etc/default/spamassassin`).
 4. Install nodejs and npm (v6+ preferred).
 5. Clone this repository and run `npm install`.
-6. Copy `config/default.json` to `config/production.json` and configure accordingly.
+6. Copy `config/default.yaml` to `config/production.yaml` and configure accordingly.
 7. Set the environment variable `NODE_ENV` to `production` and run `node index.js`.
 8. Start using your bot!
 
 # Security considerations
 
-Currently the bot takes the raw email HTML and puts it into the database with basic SQL-injection avoidance. The HTML is then dumped into a templated HTML page without sanitization. It is up to the room administrators to set an appropriate `allow_from` restriction to only allow trusted senders. The service provider should take appropriate steps to reduce the chance of attack from their domain. Future updates will implement basic security checks to reduce risk of attack.
+Currently the bot does some sanitizing on the email received. However, it still ends up going through `node-sqlite` (or whatever storage backend) which may not completely avoid SQL-injection or similar attacks. **Room administrators are expected to set the appropriate restrictions on their rooms to only allow trusted senders and content.** The bot also does some sanitizing of the HTML body before storing it to reduce the chance of XSS or similar attacks when sending the email to Matrix or web browser for viewing. Matrix clients (such as Riot) are expected to process that HTML further if desired. For instance, the bot currently allows `h1` and `h2` tags, Riot does not and therefore Riot is responsible for removing those tags.

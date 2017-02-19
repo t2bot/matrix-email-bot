@@ -3,11 +3,16 @@
   "version": "1.0.0",
   "dependencies": {
     "config": "^1.24.0",
+    "db-migrate": "^0.10.0-beta.20",
+    "db-migrate-sqlite3": "^0.2.1",
     "express": "^4.14.0",
+    "extend": "^3.0.0",
+    "js-yaml": "^3.8.1",
     "mailin": "^3.0.3",
     "matrix-js-sdk": "^0.7.2",
     "npmlog": "^4.0.2",
     "pug": "^0.1.0",
+    "sanitize-html": "^1.14.1",
     "sqlite3": "^3.1.8",
     "striptags": "^3.0.1",
     "uuid": "^3.0.1"
