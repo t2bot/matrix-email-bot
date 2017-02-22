@@ -17,7 +17,7 @@ A bot that posts messages to rooms when an email is received. Ideal for uses whe
 
 Currently matrix-email-bot is a single application that listens on port 25 for any incoming mail and processes it on it's own, (so you can only run the bot on a server where no mailserver is running). Future plans include making the various moving parts their own services (if desired) to distribute load.
 
-1. Set up an MX record to point to your domain. For example, `email.t2bot.io 10 vps3.t2l.io`.
+1. Set up an MX record to point to your domain. For example, `email.t2bot.io 10 vps3.t2l.io` (where `email.t2bot.io` is the domain, that is used by the bot as domain part of the email and `vps3.t2l.io` is the domain of the server the bot is runing on.)
 2. Optionally install `spamassassin` and `spamc`: `sudo apt-get install spamassassin spamc` and enable spamassassin and spamc (`/etc/default/spamassassin`).
 4. Install nodejs and npm (v6+ preferred).
 5. Clone this repository and run `npm install`.
