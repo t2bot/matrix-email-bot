@@ -1,29 +1,39 @@
 # matrix-email-bot
 A bot that posts messages to rooms when an email is received. Ideal for uses where a short message is desired in a chat room when a newsletter goes out.
 
+Questions? Ask away in [#email:t2bot.io](https://matrix.to/#/#email:t2bot.io)
+
 # How to use
 
 *Note*: Currently this is in the early stages of development and is therefore somewhat restricted in what is possible. Future enhancements are planned to make this easier to use and set up.
 
 1. Invite `@email:t2bot.io` to your [Matrix](https://matrix.org) room.
-2. Get your room's internal ID (for instance, `!ooXDTgcuwbbtVkAEJL:t2bot.io` which is `#test:t2bot.io`).
-3. Contact `@travis:t2l.io` to set the appropriate `allow_from` rule for your room. (*This is a temporary step until [#1](https://github.com/turt2live/matrix-email-bot/issues/1) is implemented*)
-4. Send an email to `<room id without !>_<domain>@email.t2bot.io` (eg: `ooXDTgcuwbbtVkAEJL_t2bot.io@email.t2bot.io`).
+2. Get your room's internal ID (for instance, `!wpcRmAaQXqgBPdUNWo:t2l.io` which is `#email:t2bot.io`).
+3. Contact `@travis:t2l.io` (in [#email:t2bot.io](https://matrix.to/#/#email:t2bot.io) or a new private chat) to set the appropriate `allow_from` rule for your room. (*This is a temporary step until [#1](https://github.com/turt2live/matrix-email-bot/issues/1) is implemented*)
+4. Send an email to `<room id without !>_<domain>@email.t2bot.io` (eg: `wpcRmAaQXqgBPdUNWo_t2l.io@email.t2bot.io`).
 5. See the message the bot posts (this may take a while depending on system load).
+
+### Subscribing to mailing lists
+
+Please reach out to `@travis:t2l.io` in [#email:t2bot.io](https://matrix.to/#/#email:t2bot.io) (or open a new private chat) to get your room mapped to a mailing list. In the future, this will be better and require less involvement from myself.
 
 # Run your own
 
 *Note*: Some experience with MX records is ideal.
 
-Currently matrix-email-bot is a single application that listens on port 25 for any incoming mail and processes it on it's own, (so you can only run the bot on a server where no mailserver is running). Future plans include making the various moving parts their own services (if desired) to distribute load.
+The bot runs best on port 25 to receive all incoming mail to your server. The bot does not (currently) send mail out, but does process all inbound emails to try and get them to the proper room (letting them disappear if no room can be mapped).
 
-1. Set up an MX record to point to your domain. For example, `email.t2bot.io 10 vps3.t2l.io` (where `email.t2bot.io` is the domain, that is used by the bot as domain part of the email and `vps3.t2l.io` is the domain of the server the bot is runing on.)
-2. Optionally install `spamassassin` and `spamc`: `sudo apt-get install spamassassin spamc` and enable spamassassin and spamc (`/etc/default/spamassassin`).
-4. Install nodejs and npm (v6+ preferred).
-5. Clone this repository and run `npm install`.
-6. Copy `config/default.yaml` to `config/production.yaml` and configure accordingly.
-7. Set the environment variable `NODE_ENV` to `production` and run `node index.js`.
-8. Start using your bot!
+1. Set up an MX record to point to your domain. For example, `email.t2bot.io 10 vps3.t2l.io` (`email.t2bot.io` being the domain, `10` the priority, and `vps3.t2l.io` being the server's hostname)
+2. Optionally install `spamassassin` and `spamc`: `sudo apt-get install spamassassin spamc` - be sure to enable them!
+3. Install nodejs and npm (v6+ preferred).
+4. Clone this repository and run `npm install`.
+5. Copy `config/default.yaml` to `config/production.yaml` and configure accordingly.
+6. Set the environment variable `NODE_ENV` to `production` and run `node index.js`.
+7. Start using your bot!
+
+### Subscribing to mailing lists
+
+Some mailing lists require you to send an email in order to subscribe. This requires setting up a mailserver (such as postfix) in send-only mode because the bot is handling incoming mail. After setting up your mail server, use it to send an email to the list with the `From` address being the room you'd like to announce to. For example: `echo "Subscribe" | mail -s "Subscribe" mailinglist+subscribe@domain.com -aFrom:myroom_matrix.org@email.t2bot.io`
 
 # Security considerations
 
