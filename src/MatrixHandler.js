@@ -41,6 +41,7 @@ class MatrixHandler {
      * @private
      */
     _updateRoomList() {
+        log.info("MatrixHandler - _updateRoomList", "Updating room list");
         var roomList = [];
 
         var rooms = this._client.getRooms();
@@ -58,6 +59,7 @@ class MatrixHandler {
         }
 
         this._roomList = roomList;
+        log.info("MatrixHandler - _updateRoomList", "Currently in " + this._roomList.length + " rooms");
     }
 
     /**
@@ -67,7 +69,7 @@ class MatrixHandler {
      */
     postMessageToRoom(message, roomId) {
         if (this._roomList.indexOf(roomId) === -1) {
-            log.warning("MatrixHandler", "Attempt to send message to room " + roomId + ", but not in that room");
+            log.warn("MatrixHandler", "Attempt to send message to room " + roomId + ", but not in that room");
             return; // not in room - skip message
         }
 

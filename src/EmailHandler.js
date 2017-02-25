@@ -74,65 +74,70 @@ class EmailHandler {
 
             var primaryFrom = message.from[0];
 
-            log.info("EmailHandler", "Processing message from " + primaryFrom.email + " (sent to " + emailTargets.length + " targets)");
+            log.info("EmailHandler", "Processing message from " + primaryFrom.address + " (sent to " + emailTargets.length + " targets)");
 
             var rooms = [];
             for (var target of emailTargets) {
                 if (!target.address) continue; // skip address - no processing
 
-                let roomConfig = util.getRoomConfigForTarget(target.address, target.source);
-                if (!roomConfig) {
-                    log.warn("EmailHandler", "No configuration for target (may not be allowed) " + target.address);
+                let roomConfigs = util.getRoomConfigsForTarget(target.address, target.source);
+                if (!roomConfigs) {
+                    log.warn("EmailHandler", "No configurations for target (may not be allowed) " + target.address);
                     continue;
                 }
 
-                if (rooms.indexOf(roomConfig.roomId) !== -1) {
-                    log.warn("EmailHandler", "Not handling duplicate message for room " + roomConfig.roomId);
-                    continue;
-                }
-
-                var allowed = true;
-                if (!roomConfig.allowFromAnyone) {
-                    for (var fromAddress of message.from) {
-                        if (!fromAddress.address)continue;
-
-                        if (roomConfig.allowedSenders.indexOf(fromAddress.address.toLowerCase()) === -1) {
-                            log.warn("EmailHandler", "Ignoring from address " + fromAddress.address + " - not on allowed senders list");
-                            allowed = false;
-                            break;
-                        }
-
-                        if (roomConfig.blockedSenders.indexOf(fromAddress.address.toLowerCase()) !== -1) {
-                            log.warn("EmailHandler", "Ignoring from address " + fromAddress.address + " - sender is blocked");
-                            allowed = false;
-                            break;
-                        }
+                for (var roomConfig of roomConfigs) {
+                    if (rooms.indexOf(roomConfig.roomId) !== -1) {
+                        log.warn("EmailHandler", "Not handling duplicate message for room " + roomConfig.roomId);
+                        continue;
                     }
-                } else {
-                    log.info("EmailHandler", "Room is set to allow mail from anyone: " + roomConfig.roomId);
-                    allowed = true;
-                }
 
-                if (!allowed) {
-                    log.warn("EmailHandler", "Blocking email to room " + roomConfig.roomId + ": sender is not allowed");
-                    continue;
-                }
+                    var allowed = true;
+                    if (!roomConfig.allowFromAnyone) {
+                        for (var fromAddress of message.from) {
+                            if (!fromAddress.address)continue;
 
-                rooms.push(roomConfig.roomId);
+                            if (roomConfig.allowedSenders.indexOf(fromAddress.address.toLowerCase()) === -1) {
+                                log.warn("EmailHandler", "Ignoring from address " + fromAddress.address + " - not on allowed senders list");
+                                allowed = false;
+                                break;
+                            }
 
-                var contentTypeHeader = (message.headers['content-type'] || "text/plain").toLowerCase();
-                var isHtml = contentTypeHeader.indexOf("text/plain") !== 0;
-                var htmlBody = sanitizeHtml(message.html, sanitizerOptions);
-                var dbMessage = this._db.prepareMessage(message.messageId, primaryFrom.address, primaryFrom.name, target.address, target.name, message.subject, message.text, htmlBody, isHtml, roomConfig.roomId);
-                let matrix = this._matrix;
-                if (roomConfig.skipDatabase) {
-                    log.info("EmailHandler", "Message skipped database: Posting message as-is to room");
-                    matrix.postMessageToRoom(dbMessage, roomConfig.roomId);
-                } else {
-                    this._db.writeMessage(dbMessage).then(msg=> {
-                        log.info("EmailHandler", "Message saved. Id = " + msg.id);
-                        matrix.postMessageToRoom(msg, roomConfig.roomId);
-                    });
+                            if (roomConfig.blockedSenders.indexOf(fromAddress.address.toLowerCase()) !== -1) {
+                                log.warn("EmailHandler", "Ignoring from address " + fromAddress.address + " - sender is blocked");
+                                allowed = false;
+                                break;
+                            }
+                        }
+                    } else {
+                        log.info("EmailHandler", "Room is set to allow mail from anyone: " + roomConfig.roomId);
+                        allowed = true;
+                    }
+
+                    if (!allowed) {
+                        log.warn("EmailHandler", "Blocking email to room " + roomConfig.roomId + ": sender is not allowed");
+                        continue;
+                    }
+
+                    rooms.push(roomConfig.roomId);
+
+                    var contentTypeHeader = (message.headers['content-type'] || "text/plain").toLowerCase();
+                    var isHtml = contentTypeHeader.indexOf("text/plain") !== 0;
+                    var htmlBody = sanitizeHtml(message.html, sanitizerOptions);
+                    var textBody = message.text;
+                    var dbMessage = this._db.prepareMessage(message.messageId, primaryFrom.address, primaryFrom.name, target.address, target.name, message.subject, textBody, htmlBody, isHtml, roomConfig.roomId);
+                    let matrix = this._matrix;
+                    if (roomConfig.skipDatabase) {
+                        log.info("EmailHandler", "Message skipped database: Posting message as-is to room");
+                        matrix.postMessageToRoom(dbMessage, roomConfig.roomId);
+                    } else {
+                        this._db.writeMessage(dbMessage).then(msg=> {
+                            //noinspection JSReferencingMutableVariableFromClosure
+                            console.log(roomConfig);
+                            log.info("EmailHandler", "Message saved. Id = " + msg.id);
+                            matrix.postMessageToRoom(msg, roomConfig.roomId);
+                        });
+                    }
                 }
             }
         }, err => {

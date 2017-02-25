@@ -3,12 +3,12 @@ var log = require("npmlog");
 var extend = require("extend");
 
 class Utils {
-    static getRoomConfigForTarget(emailAddress, source) {
-        log.info("utils", "getRoomConfigForTarget - Start lookup for " + emailAddress + " source: " + source);
-        var roomConfig = null;
+    static getRoomConfigsForTarget(emailAddress, source) {
+        var configs = [];
+        log.info("utils", "getRoomConfigsForTarget - Start lookup for " + emailAddress + " source: " + source);
         var customMapping = config.get("customMailTargets")[emailAddress];
         if (!customMapping) {
-            log.info("utils", "getRoomConfigForTarget - No custom mapping for " + emailAddress);
+            log.info("utils", "getRoomConfigsForTarget - No custom mapping for " + emailAddress);
             var mailDomain = config.get("mail.domain");
 
             if (emailAddress.endsWith('@' + mailDomain)) {
@@ -16,22 +16,31 @@ class Utils {
                 if (parts.length < 2) return null; // Invalid email address
 
                 var roomId = "!" + parts.shift() + ":" + parts.join("_");
-                roomConfig = Utils.getRoomConfig(roomId);
+                configs.push(Utils.getRoomConfig(roomId));
             }
-        } else roomConfig = Utils.getRoomConfig(customMapping);
-
-        if (!roomConfig) {
-            log.warn("utils", "getRoomConfigForTarget - No room config found for " + emailAddress);
-            return null;
+        } else {
+            for (var mappedRoomId of customMapping) {
+                configs.push(Utils.getRoomConfig(mappedRoomId));
+            }
         }
 
-        log.info("utils", "getRoomConfigForTarget - Checking cc, bcc, and to for " + emailAddress);
-        if (source == "cc" && !roomConfig['useCcAsTarget']) return null;
-        if (source == "bcc" && !roomConfig['useBccAsTarget']) return null;
-        if (source == "to" && !roomConfig['useToAsTarget']) return null;
+        if (configs.length == 0) {
+            log.warn("utils", "getRoomConfigsForTarget - No room configs found for " + emailAddress);
+            return null;
+        } else log.info("utils", "getRoomConfigsForTarget - Found " + configs.length + " configurations");
 
-        log.info("utils", "getRoomConfigForTarget - Sender allowed, returning config for room " + roomConfig.roomId);
-        return roomConfig;
+        log.info("utils", "getRoomConfigsForTarget - Checking cc, bcc, and to for " + emailAddress);
+        var newConfigs = [];
+        for (var roomConfig of configs) {
+            if (source == "cc" && !roomConfig['useCcAsTarget']) continue;
+            if (source == "bcc" && !roomConfig['useBccAsTarget']) continue;
+            if (source == "to" && !roomConfig['useToAsTarget']) continue;
+            newConfigs.push(roomConfig); // must be safe to use at this point
+        }
+        configs = newConfigs;
+
+        log.info("utils", "getRoomConfigForTarget - Sender allowed, returning " + newConfigs.length + " configs");
+        return configs;
     }
 
     static getRoomConfig(roomId) {
