@@ -13,7 +13,7 @@ Questions? Ask away in [#email:t2bot.io](https://matrix.to/#/#email:t2bot.io)
 4. Send an email to `<room id without !>_<domain>@email.t2bot.io` (eg: `wpcRmAaQXqgBPdUNWo_t2l.io@email.t2bot.io`).
 5. See the message the bot posts (this may take a while depending on system load).
 
-### Subscribing to mailing lists
+## Subscribing to mailing lists
 
 Please reach out to `@travis:t2l.io` in [#email:t2bot.io](https://matrix.to/#/#email:t2bot.io) (or open a new private chat) to get your room mapped to a mailing list. In the future, this will be better and require less involvement from myself.
 
@@ -31,7 +31,15 @@ The bot runs best on port 25 to receive all incoming mail to your server. The bo
 6. Set the environment variable `NODE_ENV` to `production` and run `node index.js`.
 7. Start using your bot!
 
-### Subscribing to mailing lists
+## Running with an existing mail server
+
+*TODO: Instructions on how to set up postfix*
+
+If mail is currently being managed for your domain, or you'd like to filter the incoming mail in a more intelligent manner before it reaches the bot, set `enabled` to `false` under `mail` in the configuration file. This will disable the default SMTP listener on the bot.
+
+The existing mail server will need to be configured to run an external program so mail can be sent to the bot. Have the mail server run `node post_message.js` in the bot's directory to post a message from the standard input pipe. If the email is in file form, use the following syntax: `node post_message.js path/to/file.eml`. 
+
+## Subscribing to mailing lists
 
 Some mailing lists require you to send an email in order to subscribe. This requires setting up a mailserver (such as postfix) in send-only mode because the bot is handling incoming mail. After setting up your mail server, use it to send an email to the list with the `From` address being the room you'd like to announce to. For example: `echo "Subscribe" | mail -s "Subscribe" mailinglist+subscribe@domain.com -aFrom:myroom_matrix.org@email.t2bot.io`
 

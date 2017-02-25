@@ -13,13 +13,13 @@ db.prepare().then(() => {
     // Create the matrix handler
     var matrix = new MatrixHandler();
 
+    // start the email handler
+    log.info("index", "Starting email handler");
+    var emailHandler = new EmailHandler(matrix, db);
+
     // start the web handler (variable not needed)
     log.info("index", "Starting web handler");
-    new WebHandler(db);
-
-    // start the email handler (variable not needed)
-    log.info("index", "Starting email handler");
-    new EmailHandler(matrix, db);
+    new WebHandler(db, emailHandler);
 }, err=> {
     log.error("index", "Error preparing database");
     log.error("index", err);

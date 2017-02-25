@@ -5,9 +5,13 @@ matrix:
 mail:
   port: 25
   domain: "email.t2bot.io"
+  enabled: true
 web:
   port: 80
   bindIp: '0.0.0.0'
+  # This is the 'secret' used by the local agent (when invoked) to post the message to the web server
+  # Be sure to make this nice and random!
+  secret: 'YOUR_SECRET_HERE'
 customMailTargets:
   "myemail@domain.com":
   - "!ooXDTgcuwbbtVkAEJL:t2bot.io"

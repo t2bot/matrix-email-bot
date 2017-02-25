@@ -46,23 +46,25 @@ class EmailHandler {
         this._emailConfig = config.mail;
         this._matrix = matrix;
         this._db = db;
-        mailin.start({
-            port: this._emailConfig.port,
-            disableWebhook: true
-        });
 
-        //noinspection JSUnusedLocalSymbols
-        mailin.on('message', function (connection, data, content) {
-            this._processMessage(data);
-        }.bind(this));
+        if(config.get("mail.enabled")) {
+            mailin.start({
+                port: this._emailConfig.port,
+                disableWebhook: true
+            });
+
+            //noinspection JSUnusedLocalSymbols
+            mailin.on('message', function (connection, data, content) {
+                this.processMessage(data);
+            }.bind(this));
+        }
     }
 
     /**
      * Processes a given inbound message
-     * @param message
-     * @private
+     * @param message the message to process
      */
-    _processMessage(message) {
+    processMessage(message) {
         this._db.checkMessageNotExists(message.messageId).then(() => {
             var emailTargets = [];
 
