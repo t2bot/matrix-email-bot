@@ -63,14 +63,15 @@ class DataStore {
      * @param {string} toAddress the email address the message was sent to
      * @param {string} toName the name of the receiver. Null/undefined values are converted to empty strings
      * @param {string} subject the subject for the email message
-     * @param {string} text the plaintext body for the email message
+     * @param {string} text the plaintext body for the email message; can be trimmed of replies/signatures/etc
      * @param {string} html the HTML body for the email message (even if the message wasn't HTML)
+     * @param {string} fullTextBody the full, untrimmed, text body for the email message
      * @param {boolean} isHtml true if the original email was intended to be HTML, false otherwise
      * @param {string} roomId the target room ID for the message
-     * @returns {{email_id: string, from_name: string, from_email: string, to_name: string, to_email: string, subject: string, text_body: string, html_body: string, is_html: boolean, target_room: string}} a DTO for the storage system (used for #writeMessage())
+     * @returns {{email_id: string, from_name: string, from_email: string, to_name: string, to_email: string, subject: string, text_body: string, html_body: string, full_text_body: string, is_html: boolean, target_room: string}} a DTO for the storage system (used for #writeMessage())
      * @see #writeMessage
      */
-    prepareMessage(messageId, fromAddress, fromName, toAddress, toName, subject, text, html, isHtml, roomId) {
+    prepareMessage(messageId, fromAddress, fromName, toAddress, toName, subject, text, html, fullTextBody, isHtml, roomId) {
         log.info("DataStore", "prepareMessage - creating for message ID " + messageId);
         return {
             email_id: messageId,
@@ -81,6 +82,7 @@ class DataStore {
             subject: subject,
             text_body: text,
             html_body: html,
+            full_text_body: fullTextBody,
             is_html: isHtml,
             target_room: roomId
         };
@@ -88,15 +90,15 @@ class DataStore {
 
     /**
      * Writes a DTO to the storage system
-     * @param {{email_id: string, from_name: string, from_email: string, to_name: string, to_email: string, subject: string, text_body: string, html_body: string, is_html: boolean, target_room: string}} message the message to write
+     * @param {{email_id: string, from_name: string, from_email: string, to_name: string, to_email: string, subject: string, text_body: string, html_body: string, full_text_body: string, is_html: boolean, target_room: string}} message the message to write
      * @returns {Promise} resolves with the implementation message written (eg: DB object), rejected if writing fails
      */
     writeMessage(message) {
         log.info("DataStore", "writeMessage - Starting write for " + message.email_id);
         return new Promise((resolve, reject)=> {
             var id = uuid.v4();
-            this._db.run("INSERT INTO emails (id, email_id, from_email, from_name, to_email, to_name, subject, text_body, html_body, is_html, received_timestamp, target_room) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, ?)",
-                id, message.email_id, message.from_email, message.from_name, message.to_email, message.to_name, message.subject, message.text_body, message.html_body, message.is_html, message.target_room,
+            this._db.run("INSERT INTO emails (id, email_id, from_email, from_name, to_email, to_name, subject, text_body, html_body, full_text_body, is_html, received_timestamp, target_room) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, ?)",
+                id, message.email_id, message.from_email, message.from_name, message.to_email, message.to_name, message.subject, message.text_body, message.html_body, message.full_text_body, message.is_html, message.target_room,
                 function (generatedId, error) {
                     log.info("DataStore", "writeMessage - Message written (" + (error ? false : true) + "): " + id + " (" + message.email_id + ")");
                     if (error)reject(error);

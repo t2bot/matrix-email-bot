@@ -3,6 +3,7 @@ var config = require("config");
 var log = require("npmlog");
 var util = require("./utils");
 var sanitizeHtml = require("sanitize-html");
+var parseReply = require("parse-reply");
 
 // Much of this is based off of matrix-react-sdk's HtmlUtils
 // https://github.com/matrix-org/matrix-react-sdk/blob/41936a957fdc5250d7c6c68d87ea4b21896080b0/src/HtmlUtils.js#L83-L140
@@ -125,15 +126,20 @@ class EmailHandler {
                     var isHtml = contentTypeHeader.indexOf("text/plain") !== 0;
                     var htmlBody = sanitizeHtml(message.html, sanitizerOptions);
                     var textBody = message.text;
-                    var dbMessage = this._db.prepareMessage(message.messageId, primaryFrom.address, primaryFrom.name, target.address, target.name, message.subject, textBody, htmlBody, isHtml, roomConfig.roomId);
+                    var fullTextBody = message.text;
+
+                    if (roomConfig.trimReplies) {
+                        textBody = parseReply(textBody);
+                        // can't trim HTML body nicely, so we won't bother
+                    }
+
+                    var dbMessage = this._db.prepareMessage(message.messageId, primaryFrom.address, primaryFrom.name, target.address, target.name, message.subject, textBody, htmlBody, fullTextBody, isHtml, roomConfig.roomId);
                     let matrix = this._matrix;
                     if (roomConfig.skipDatabase) {
                         log.info("EmailHandler", "Message skipped database: Posting message as-is to room");
                         matrix.postMessageToRoom(dbMessage, roomConfig.roomId);
                     } else {
                         this._db.writeMessage(dbMessage).then(msg=> {
-                            //noinspection JSReferencingMutableVariableFromClosure
-                            console.log(roomConfig);
                             log.info("EmailHandler", "Message saved. Id = " + msg.id);
                             matrix.postMessageToRoom(msg, roomConfig.roomId);
                         });

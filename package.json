@@ -11,6 +11,7 @@
     "mailin": "^3.0.3",
     "matrix-js-sdk": "^0.7.2",
     "npmlog": "^4.0.2",
+    "parse-reply": "0.0.4",
     "pug": "^0.1.0",
     "sanitize-html": "^1.14.1",
     "sqlite3": "^3.1.8",
