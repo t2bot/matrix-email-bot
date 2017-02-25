@@ -18,7 +18,7 @@ class Utils {
                 var roomId = "!" + parts.shift() + ":" + parts.join("_");
                 roomConfig = Utils.getRoomConfig(roomId);
             }
-        } else roomConfig = Utils.getRoomConfig(roomConfig);
+        } else roomConfig = Utils.getRoomConfig(customMapping);
 
         if (!roomConfig) {
             log.warn("utils", "getRoomConfigForTarget - No room config found for " + emailAddress);
