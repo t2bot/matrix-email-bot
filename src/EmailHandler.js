@@ -3,7 +3,8 @@ var config = require("config");
 var log = require("npmlog");
 var util = require("./utils");
 var sanitizeHtml = require("sanitize-html");
-var parseReply = require("parse-reply");
+var replyParser = require("node-email-reply-parser");
+var _ = require("lodash");
 
 // Much of this is based off of matrix-react-sdk's HtmlUtils
 // https://github.com/matrix-org/matrix-react-sdk/blob/41936a957fdc5250d7c6c68d87ea4b21896080b0/src/HtmlUtils.js#L83-L140
@@ -130,21 +131,37 @@ class EmailHandler {
                     var textBody = message.text;
                     var fullTextBody = message.text;
 
-                    if (roomConfig.trimReplies) {
-                        textBody = parseReply(textBody);
-                        // can't trim HTML body nicely, so we won't bother
+                    var textSegments = [textBody];
+
+                    // can't trim HTML body nicely, so we won't bother
+                    if (roomConfig.postReplies) {
+                        var fragments = replyParser(textBody).getFragments();
+                        textSegments = _.map(fragments, f => f.getContent());
+                    } else {
+                        textSegments = [replyParser(textBody, true)];
                     }
 
-                    var dbMessage = this._db.prepareMessage(message.messageId, primaryFrom.address, primaryFrom.name, target.address, target.name, message.subject, textBody, htmlBody, fullTextBody, isHtml, roomConfig.roomId);
+                    textSegments = _.filter(textSegments, s => s.trim().length > 0);
+
+                    var dbMessages = [];
+                    for(var segment of textSegments) {
+                        var msg = this._db.prepareMessage(message.messageId, primaryFrom.address, primaryFrom.name, target.address, target.name, message.subject, segment, htmlBody, fullTextBody, isHtml, roomConfig.roomId);
+                        dbMessages.push(msg);
+                    }
+
                     let matrix = this._matrix;
                     if (roomConfig.skipDatabase) {
                         log.info("EmailHandler", "Message skipped database: Posting message as-is to room");
-                        matrix.postMessageToRoom(dbMessage, roomConfig.roomId);
+                        for(var dbMessage of dbMessages) {
+                            matrix.postMessageToRoom(dbMessage, roomConfig.roomId);
+                        }
                     } else {
-                        this._db.writeMessage(dbMessage).then(msg=> {
-                            log.info("EmailHandler", "Message saved. Id = " + msg.id);
-                            matrix.postMessageToRoom(msg, roomConfig.roomId);
-                        });
+                        for(var dbMessage of dbMessages) {
+                            this._db.writeMessage(dbMessage).then(msg=> {
+                                log.info("EmailHandler", "Message saved. Id = " + msg.id);
+                                matrix.postMessageToRoom(msg, roomConfig.roomId);
+                            });
+                        }
                     }
                 }
             }

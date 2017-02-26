@@ -25,7 +25,7 @@ defaultRoomConfig:
   useToAsTarget: true
   plaintextOnly: false
   messageFormat: "$subject: <a href='https://email.t2bot.io/m/$id'>Click to view</a>"
-  trimReplies: true
+  postReplies: false
 roomConfigs:
   "!ooXDTgcuwbbtVkAEJL:t2bot.io":
     allowFromAnyone: false
