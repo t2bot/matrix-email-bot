@@ -3,6 +3,7 @@ var sdk = require("matrix-js-sdk");
 var striptags = require("striptags");
 var log = require("npmlog");
 var util = require("./utils");
+var MessageType = require("./MessageType");
 
 /**
  * Handles matrix traffic for the bot
@@ -66,8 +67,11 @@ class MatrixHandler {
      * Posts an email message to the room given.
      * @param {*} message the email message to post
      * @param {String} roomId the room ID to post to
+     * @param {MessageType} [messageType] the type of message (defaults to MessageType.PRIMARY)
      */
-    postMessageToRoom(message, roomId) {
+    postMessageToRoom(message, roomId, messageType) {
+        if (!messageType) messageType = MessageType.PRIMARY;
+
         if (this._roomList.indexOf(roomId) === -1) {
             log.warn("MatrixHandler", "Attempt to send message to room " + roomId + ", but not in that room");
             return; // not in room - skip message
@@ -80,6 +84,14 @@ class MatrixHandler {
         }
 
         var mtxMessage = config.messageFormat;
+        if (messageType != MessageType.PRIMARY) {
+            mtxMessage = config[messageType.toString().toLowerCase() + "Format"];
+            if (!mtxMessage) {
+                log.warn("MatrixHandler", "Could not find format for message type '" + messageType.toString() + "', using fragmentFormat");
+                mtxMessage = config["fragmentFormat"];
+            }
+        }
+
         for (var property in message) {
             mtxMessage = mtxMessage.replace("$" + property, message[property]);
         }

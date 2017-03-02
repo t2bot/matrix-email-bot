@@ -25,6 +25,7 @@ defaultRoomConfig:
   useToAsTarget: true
   plaintextOnly: false
   messageFormat: "$subject: <a href='https://email.t2bot.io/m/$id'>Click to view</a>"
+  fragmentFormat: "$text_body"
   postReplies: false
 roomConfigs:
   "!ooXDTgcuwbbtVkAEJL:t2bot.io":

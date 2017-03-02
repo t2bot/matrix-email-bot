@@ -5,6 +5,7 @@ var util = require("./utils");
 var sanitizeHtml = require("sanitize-html");
 var replyParser = require("node-email-reply-parser");
 var _ = require("lodash");
+var MessageType = require("./MessageType");
 
 // Much of this is based off of matrix-react-sdk's HtmlUtils
 // https://github.com/matrix-org/matrix-react-sdk/blob/41936a957fdc5250d7c6c68d87ea4b21896080b0/src/HtmlUtils.js#L83-L140
@@ -150,16 +151,19 @@ class EmailHandler {
                     }
 
                     let matrix = this._matrix;
+                    var msgType = MessageType.PRIMARY;
                     if (roomConfig.skipDatabase) {
                         log.info("EmailHandler", "Message skipped database: Posting message as-is to room");
                         for(var dbMessage of dbMessages) {
-                            matrix.postMessageToRoom(dbMessage, roomConfig.roomId);
+                            matrix.postMessageToRoom(dbMessage, roomConfig.roomId, msgType);
+                            msgType = MessageType.FRAGMENT;
                         }
                     } else {
                         for(var dbMessage of dbMessages) {
                             this._db.writeMessage(dbMessage).then(msg=> {
                                 log.info("EmailHandler", "Message saved. Id = " + msg.id);
-                                matrix.postMessageToRoom(msg, roomConfig.roomId);
+                                matrix.postMessageToRoom(msg, roomConfig.roomId, msgType);
+                                msgType = MessageType.FRAGMENT;
                             });
                         }
                     }
