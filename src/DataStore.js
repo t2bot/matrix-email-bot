@@ -111,7 +111,7 @@ class DataStore {
 
     /**
      * Saves an attachment
-     * @param {{name: string, content: Buffer}} attachment the attachment to save
+     * @param {{name: string, content: Buffer, type: string}} attachment the attachment to save
      * @param {String} messageId the message ID to link the attachment to
      */
     saveAttachment(attachment, messageId) {
@@ -121,7 +121,9 @@ class DataStore {
             var target = path.join(".", "db", "attachments", id + ".attachment");
             fs.writeFileSync(target, attachment.content);
             log.info("DataStore", "saveAttachment - Attachment written to file: " + target);
-            this._db.run("INSERT INTO attachments (id, email_id) VALUES (?, ?)", id, messageId, function (generatedId, error) {
+            this._db.run("INSERT INTO attachments (id, email_id, file_name, content_type) VALUES (?, ?, ?, ?)",
+                id, messageId, attachment.name, attachment.type,
+                function (generatedId, error) {
                 log.info("DataStore", "saveAttachment - Attachment saved to DB (" + (error ? false : true) + ": " + id + " to message " + messageId);
                 if (error)reject(error);
                 else resolve();
