@@ -4,6 +4,7 @@ var striptags = require("striptags");
 var log = require("npmlog");
 var util = require("./utils");
 var MessageType = require("./MessageType");
+var streamifier = require("streamifier");
 
 /**
  * Handles matrix traffic for the bot
@@ -110,6 +111,48 @@ class MatrixHandler {
 
         log.info("MatrixHandler", "Sending message to room " + roomId);
         this._client.sendMessage(roomId, mtxContent);
+    }
+
+    /**
+     * Posts an email attachment to the room given
+     * @param {{name: string, content: Buffer, type: string}} attachment the attachment to post
+     * @param {String} roomId the room ID to post to
+     */
+    postAttachmentToRoom(attachment, roomId) {
+        log.info("MatrixHandler", "Posting attachment '" + attachment.name + "' to room " + roomId);
+        if (this._roomList.indexOf(roomId) === -1) {
+            log.warn("MatrixHandler", "Attempt to send message to room " + roomId + ", but not in that room");
+            return; // not in room - skip message
+        }
+
+        var config = util.getRoomConfig(roomId);
+        if (!config) {
+            log.error("MatrixHandler", "No configuration for room " + roomId + ", but a message was supposed to go there");
+            return;
+        }
+
+        var eventType = "m.file";
+        if (config["attachments"]["contentMapping"][attachment.type]) {
+            eventType = config["attachments"]["contentMapping"][attachment.type];
+        }
+
+        log.info("MatrixHandler", "Uploading attachment '" + attachment.name + "' to room " + roomId);
+        this._client.uploadContent({
+            stream: streamifier.createReadStream(attachment.content),
+            name: attachment.name
+        }).then(url => {
+            log.info("MatrixHandler", "Got MXC URL for '" + attachment.name + "': " + url);
+            var content = {
+                msgtype: eventType,
+                body: attachment.name,
+                url: JSON.parse(url).content_uri,
+                info: {
+                    mimetype: attachment.type
+                }
+            };
+            log.info("MatrixHandler", "Posting attachment '" + attachment.name + "' to room " + roomId + " as event type " + eventType);
+            this._client.sendMessage(roomId, content);
+        });
     }
 }
 

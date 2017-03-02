@@ -2,6 +2,8 @@ var sqlite3 = require('sqlite3');
 var uuid = require("uuid");
 var DBMigrate = require("db-migrate");
 var log = require("npmlog");
+var fs = require("fs");
+var path = require("path");
 
 /**
  * Represents the storage mechanism for emails and other information
@@ -104,6 +106,26 @@ class DataStore {
                     if (error)reject(error);
                     else this.getMessage(id).then(resolve, reject);
                 }.bind(this));
+        });
+    }
+
+    /**
+     * Saves an attachment
+     * @param {{name: string, content: Buffer}} attachment the attachment to save
+     * @param {String} messageId the message ID to link the attachment to
+     */
+    saveAttachment(attachment, messageId) {
+        log.info("DataStore", "saveAttachment - Starting write for " + attachment.name);
+        return new Promise((resolve, reject) => {
+            var id = uuid.v4();
+            var target = path.join(".", "db", "attachments", id + ".attachment");
+            fs.writeFileSync(target, attachment.content);
+            log.info("DataStore", "saveAttachment - Attachment written to file: " + target);
+            this._db.run("INSERT INTO attachments (id, email_id) VALUES (?, ?)", id, messageId, function (generatedId, error) {
+                log.info("DataStore", "saveAttachment - Attachment saved to DB (" + (error ? false : true) + ": " + id + " to message " + messageId);
+                if (error)reject(error);
+                else resolve();
+            }.bind(this));
         });
     }
 

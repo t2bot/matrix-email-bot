@@ -13,6 +13,8 @@ config/production.yaml
 config/development.yaml
 test.eml
 
+db/attachments/*.attachment
+
 # Logs
 logs
 *.log

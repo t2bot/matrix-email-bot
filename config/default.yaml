@@ -79,6 +79,37 @@ defaultRoomConfig:
   # being posted in the rough to the room.
   plaintextOnly: false
 
+  # Attachment processing settings
+  attachments:
+    # If true, the bot will post allowed attachments to the room
+    post: true
+
+    # If true, the bot will accept all types of attachments (ignoring whatever is defined
+    # in the allowedTypes list). Anything blocked by blockedTypes will not be sent.
+    allowAllTypes: false
+
+    # MIME type mapping to Matrix events. Defaults to m.file if not listed here.
+    # This is intended for advanced usage of the bot.
+    contentMapping:
+      "image/jpeg": "m.image"
+      "image/jpg": "m.image"
+      "image/png": "m.image"
+      "image/gif": "m.image"
+      "video/mp4": "m.video"
+      "audio/aac": "m.audio"
+
+    # The allowed MIME types to be posted to the room. Only applies if allowAllTypes is off
+    allowedTypes:
+    - 'image/png'
+    - 'image/jpeg'
+    - 'image/jpg'
+    - 'image/gif'
+    - 'application/pdf'
+
+    # The blocked MIME types. Attachments of these types will be skipped.
+    blockedTypes:
+    - 'application/exe'
+
   # If true, the bot will post fragments to the room. Fragments are replies, quoted parts of
   # the message, signatures, and other parts that don't appear to be part of the "primary"
   # message. By default this is turned off to avoid flooding the room with quoted messages.

@@ -152,6 +152,31 @@ class EmailHandler {
                         continue;
                     }
 
+                    var attachments = [];
+                    if (message.attachments) {
+                        var allowedTypes = (roomConfig["attachments"]["allowedTypes"] || []);
+                        var blockedTypes = (roomConfig["attachments"]["blockedTypes"] || []);
+                        for (var attachment of message.attachments) {
+                            if (!roomConfig["attachments"]["allowAllTypes"] && allowedTypes.indexOf(attachment.contentType) === -1) {
+                                log.warn("EmailHandler", "Not processing attachment '" + attachment.generatedFileName + "': Content type '" + attachment.contentType + "' is not allowed");
+                                continue;
+                            }
+
+                            if (blockedTypes.indexOf(attachment.contentType) !== -1) {
+                                log.warn("EmailHandler", "Not processing attachment '" + attachment.generatedFileName + "': Content type '" + attachment.contentType + "' is blocked");
+                                continue;
+                            }
+
+                            attachments.push({
+                                name: attachment.generatedFileName,
+                                content: attachment.content,
+                                post: roomConfig["attachments"]["post"],
+                                type: attachment.contentType
+                            });
+                        }
+                    } else log.warn("EmailHandler", "Not processing attachments: Either no attachments or posting is not permitted");
+                    log.info("EmailHandler", "Found " + attachments.length + " valid attachments");
+
                     rooms.push(roomConfig.roomId);
 
                     var contentTypeHeader = (message.headers['content-type'] || "text/plain").toLowerCase();
@@ -192,14 +217,28 @@ class EmailHandler {
                                 log.info("EmailHandler", "Message saved. Id = " + msg.id);
                                 matrix.postMessageToRoom(msg, roomConfig.roomId, msgType);
                                 msgType = MessageType.FRAGMENT;
+
+                                this._saveAttachments(attachments, msg);
                             });
                         }
+                    }
+
+                    for (var attachment of attachments) {
+                        if (!attachment.post) continue;
+                        matrix.postAttachmentToRoom(attachment, roomConfig.roomId);
                     }
                 }
             }
         }, err => {
             log.error("EmailHandler", "Error checking for message: " + err);
         });
+    }
+
+    _saveAttachments(attachments, message) {
+        for (var attachment of attachments) {
+            log.info("EmailHandler", "Linking " + attachment.name + " to message " + message.id);
+            this._db.saveAttachment(attachment, message.id);
+        }
     }
 }
 
