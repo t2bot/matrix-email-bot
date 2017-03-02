@@ -104,7 +104,7 @@ class MatrixHandler {
         if (!config.plaintextOnly) {
             log.info("MatrixHandler", "Preparing HTML message for room " + roomId);
             mtxContent["body"] = striptags(mtxContent.body);
-            mtxContent["formatted_body"] = mtxMessage; // clients are responsible for processing the HTML
+            mtxContent["formatted_body"] = mtxMessage.replace(/\n/g, '<br/>'); // clients are responsible for processing the HTML
             mtxContent["format"] = "org.matrix.custom.html";
         }
 
