@@ -1,37 +1,123 @@
+# The configuration for the matrix portion of the bot. The bot's matrix account must already
+# be created proiot to running the bot.
 matrix:
+  # The homeserver URL for the bot. For example, https://matrix.org
   homeserverUrl: "https://t2bot.io"
+
+  # The access token for the bot that authenticates it on the above homeserver.
   accessToken: "YOUR_TOKEN_HERE"
+
+  # The Matrix ID for the bot's account. For example, @email:t2bot.io
   userId: "@email:t2bot.io"
+
+# The mail server configuration.
 mail:
-  port: 25
-  domain: "email.t2bot.io"
+  # Whether or not to run the mail server. If false, then the bot will rely on being fed messages
+  # through the `post_message.js` script and not listen for any. This should be disabled if you
+  # are running your own mail server.
   enabled: true
+
+  # The port to run the mail server on (SMTP)
+  port: 25
+
+  # The accepted domain for the mail server. This is used to determine which email addresses can
+  # be automatically mapped to rooms in Matrix.
+  domain: "email.t2bot.io"
+
+# The web server configuration (used only for accessing messages in the web browser)
 web:
+  # The port to run the server on
   port: 80
+
+  # The IP to bind to (0.0.0.0 is 'all interfaces')
   bindIp: '0.0.0.0'
-  # This is the 'secret' used by the local agent (when invoked) to post the message to the web server
-  # Be sure to make this nice and random!
+
+  # This is the 'secret' used by the local agent (when invoked) to post the message to the web
+  # server. Be sure to make this nice and random!
   secret: 'YOUR_SECRET_HERE'
+
+# A collection of addresses to room mappings. Useful for mailing lists where the `To` address
+# might not be a room ID.
 customMailTargets:
-  "myemail@domain.com":
-  - "!ooXDTgcuwbbtVkAEJL:t2bot.io"
+  # Format: "support@matrix.org": ["!myRoomId:matrix.org", "!otherRoomId:t2l.io"]
+  "test@email.t2bot.io": ["ooXDTgcuwbbtVkAEJL:t2bot.io"]
+
+# The default room configuration. These are the options used when rooms under roomConfigs don't
+# specify some options. roomConfigs should only specify options that they override/change from
+# the following defaults. The defaults do not apply to rooms without a configuration - the bot
+# refuses to post in those rooms.
 defaultRoomConfig:
+  # If true, then mail will be allowed from anyone. When set to true, the bot will ignore the
+  # allowed senders list - it will literally allow anyone to post to the room via email (unless
+  # they are in the blockedSenders list)
   allowFromAnyone: true
+
+  # The allowed senders for the room. These emails are searched for in the From header of
+  # incoming messages. Only applies if allowFromAnyone is false.
   allowedSenders: []
+
+  # The senders to block from sending to the room. If someone's email is listed here and it
+  # is found in the From header then the email will not be processed from that sender. Applies
+  # even if allowFromAnyone is set to true.
   blockedSenders: []
+
+  # If true, the message will skip the database and get posted to the room immediatly. The
+  # message won't have an ID and cannot be viewed in a web browser.
   skipDatabase: false
+
+  # If true, the CC header will be searched for valid targets (rooms).
   useCcAsTarget: true
+
+  # If true, the BCC header will be searched for valid targets (rooms).
   useBccAsTarget: true
+
+  # If true, the To header will be searched for valid targets (rooms).
   useToAsTarget: true
+
+  # If true, the bot won't post an HTML message to the Matrix room, instead posting a plain
+  # text message. It is recommended to use $text_body in your formatting to avoid HTML tags
+  # being posted in the rough to the room.
   plaintextOnly: false
-  messageFormat: "$subject: <a href='https://email.t2bot.io/m/$id'>Click to view</a>"
-  fragmentFormat: "$text_body"
+
+  # If true, the bot will post fragments to the room. Fragments are replies, quoted parts of
+  # the message, signatures, and other parts that don't appear to be part of the "primary"
+  # message. By default this is turned off to avoid flooding the room with quoted messages.
   postReplies: false
+
+  # The message format for messages posted to the room. This format only applies to the first
+  # message, all other messages (replies, signatures, etc) will use the fragmentFormat. Valid
+  # variables are:
+  # $from_name       - The name of the person who sent the email (may be empty)
+  # $from_email      - The email of the person who sent the email
+  # $to_name         - The name given to the room's email address by the sender (may be empty)
+  # $to_email        - The actual email address that was accepted for the message (the room's
+  #                    email address)
+  # $subject         - The subject of the email
+  # $html_body       - The HTML formatted body (includes tags and fragments)
+  # $text_body       - The plain text body for the email (may be calculated if the sender didn't
+  #                    send a proper plain text body)
+  # $full_text_body  - The full body (including all fragments) as plain text
+  messageFormat: "$subject: <a href='https://email.t2bot.io/m/$id'>Click to view</a>"
+
+  # The format used for fragments (replies, etc). Same condition variables as messageFormat.
+  fragmentFormat: "$text_body"
+
+  # The antispam settings to use for the room
   antispam:
+    # The maximum spam score to tolerate for the room. This is on a sliding scale according to
+    # your spamassassin settings. -1 disables this spam check.
     maxScore: -1
+
+    # If true, emails that fail the DKIM check will not be posted.
     blockFailedDkim: false
+
+    # If true, emails that fail the SPF check will not be posted.
     blockFailedSpf: false
+
+# The configurations for each individual room. Settings that are overriden from the defaults
+# should be put here for each room - all other settings are assumed to be the defaults.
 roomConfigs:
+  # An example room configuration
   "!ooXDTgcuwbbtVkAEJL:t2bot.io":
     allowFromAnyone: false
     allowedSenders:
