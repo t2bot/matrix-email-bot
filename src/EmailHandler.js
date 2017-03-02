@@ -130,16 +130,21 @@ class EmailHandler {
                                 allowed = false;
                                 break;
                             }
-
-                            if (roomConfig.blockedSenders.indexOf(fromAddress.address.toLowerCase()) !== -1) {
-                                log.warn("EmailHandler", "Ignoring from address " + fromAddress.address + " - sender is blocked");
-                                allowed = false;
-                                break;
-                            }
                         }
                     } else {
                         log.info("EmailHandler", "Room is set to allow mail from anyone: " + roomConfig.roomId);
                         allowed = true;
+                    }
+
+                    // Check for blocked senders outside of the allowFromAnyone check
+                    for (var fromAddress of message.from) {
+                        if (!fromAddress.address)continue;
+
+                        if (roomConfig.blockedSenders.indexOf(fromAddress.address.toLowerCase()) !== -1) {
+                            log.warn("EmailHandler", "Ignoring from address " + fromAddress.address + " - sender is blocked");
+                            allowed = false;
+                            break;
+                        }
                     }
 
                     if (!allowed) {
