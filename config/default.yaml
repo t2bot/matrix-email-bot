@@ -27,6 +27,10 @@ defaultRoomConfig:
   messageFormat: "$subject: <a href='https://email.t2bot.io/m/$id'>Click to view</a>"
   fragmentFormat: "$text_body"
   postReplies: false
+  antispam:
+    maxScore: -1
+    blockFailedDkim: false
+    blockFailedSpf: false
 roomConfigs:
   "!ooXDTgcuwbbtVkAEJL:t2bot.io":
     allowFromAnyone: false

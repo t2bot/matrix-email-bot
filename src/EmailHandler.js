@@ -49,7 +49,7 @@ class EmailHandler {
         this._matrix = matrix;
         this._db = db;
 
-        if(config.get("mail.enabled")) {
+        if (config.get("mail.enabled")) {
             mailin.start({
                 port: this._emailConfig.port,
                 disableWebhook: true
@@ -92,10 +92,33 @@ class EmailHandler {
                 }
 
                 for (var roomConfig of roomConfigs) {
+                    log.info("EmailHandler", "Processing room config for room: " + roomConfig.roomId);
+
                     if (rooms.indexOf(roomConfig.roomId) !== -1) {
                         log.warn("EmailHandler", "Not handling duplicate message for room " + roomConfig.roomId);
                         continue;
                     }
+
+                    if (roomConfig["antispam"]) {
+                        log.info("EmailHandler", "Performing antispam checks");
+
+                        if (roomConfig["antispam"]["maxScore"] > 0 && roomConfig["antispam"]["maxScore"] <= message.spamScore) {
+                            log.warn("EmailHandler", "Spam email detected (" + message.spamScore + " is beyond threshold of " + roomConfig["antispam"]["maxScore"] + "): Voiding message");
+                            continue;
+                        } else log.info("EmailHandler", "Spam score is within threshold: " + message.spamScore + " < " + roomConfig["antispam"]["maxScore"]);
+
+                        if (roomConfig["antispam"]["blockFailedDkim"] && message.dkim !== "pass") {
+                            log.warn("EmailHandler", "Spam email detected (DKIM failure): Voiding message");
+                            continue;
+                        } else log.info("EmailHandler", "DKIM check passed (enabled = " + roomConfig["antispam"]["blockFailedDkim"] + ")");
+
+                        if (roomConfig["antispam"]["blockFailedSpf"] && message.spf !== "pass") {
+                            log.warn("EmailHandler", "Spam email detected (SPF failure): Voiding message");
+                            continue;
+                        } else log.info("EmailHandler", "SPF check passed (enabled = " + roomConfig["antispam"]["blockFailedSpf"] + ")");
+                    }
+
+                    log.info("EmailHandler", "Message passed room's antispam measures");
 
                     var allowed = true;
                     if (!roomConfig.allowFromAnyone) {
@@ -145,7 +168,7 @@ class EmailHandler {
                     textSegments = _.filter(textSegments, s => s.trim().length > 0);
 
                     var dbMessages = [];
-                    for(var segment of textSegments) {
+                    for (var segment of textSegments) {
                         var msg = this._db.prepareMessage(message.messageId, primaryFrom.address, primaryFrom.name, target.address, target.name, message.subject, segment, htmlBody, fullTextBody, isHtml, roomConfig.roomId);
                         dbMessages.push(msg);
                     }
@@ -154,12 +177,12 @@ class EmailHandler {
                     var msgType = MessageType.PRIMARY;
                     if (roomConfig.skipDatabase) {
                         log.info("EmailHandler", "Message skipped database: Posting message as-is to room");
-                        for(var dbMessage of dbMessages) {
+                        for (var dbMessage of dbMessages) {
                             matrix.postMessageToRoom(dbMessage, roomConfig.roomId, msgType);
                             msgType = MessageType.FRAGMENT;
                         }
                     } else {
-                        for(var dbMessage of dbMessages) {
+                        for (var dbMessage of dbMessages) {
                             this._db.writeMessage(dbMessage).then(msg=> {
                                 log.info("EmailHandler", "Message saved. Id = " + msg.id);
                                 matrix.postMessageToRoom(msg, roomConfig.roomId, msgType);
