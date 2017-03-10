@@ -5,6 +5,32 @@ var log = require("npmlog");
 var util = require("./utils");
 var MessageType = require("./MessageType");
 var streamifier = require("streamifier");
+var sanitizeHtml = require("sanitize-html");
+
+// Much of this is based off of matrix-react-sdk's HtmlUtils
+// https://github.com/matrix-org/matrix-react-sdk/blob/41936a957fdc5250d7c6c68d87ea4b21896080b0/src/HtmlUtils.js#L83-L140
+const sanitizerOptions = {
+    allowedTags: [
+        'font',
+        'del',
+        'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'p', 'a', 'ul', 'ol',
+        'nl', 'li', 'b', 'i', 'u', 'strong', 'em', 'strike', 'code', 'hr', 'br', 'div',
+        'table', 'thead', 'caption', 'tbody', 'tr', 'th', 'td', 'pre'
+    ],
+    allowedAttributes: {
+        // custom ones first:
+        font: ['color'], // custom to matrix
+        a: ['href', 'name', 'target', 'rel']
+    },
+    // Lots of these won't come up by default because we don't allow them
+    selfClosing: ['img', 'br', 'hr', 'area', 'base', 'basefont', 'input', 'link', 'meta'],
+    allowedSchemes: ['http', 'https', 'ftp', 'mailto'],
+
+    // DO NOT USE. sanitize-html allows all URL starting with '//'
+    // so this will always allow links to whatever scheme the
+    // host page is served over.
+    allowedSchemesByTag: {},
+};
 
 /**
  * Handles matrix traffic for the bot
@@ -94,7 +120,10 @@ class MatrixHandler {
         }
 
         for (var property in message) {
-            mtxMessage = mtxMessage.replace("$" + property, message[property]);
+            var val = message[property];
+            if (property == "html_body")
+                val = sanitizeHtml(val, sanitizerOptions);
+            mtxMessage = mtxMessage.replace("$" + property, val);
         }
 
         var mtxContent = {

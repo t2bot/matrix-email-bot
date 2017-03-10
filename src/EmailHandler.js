@@ -2,35 +2,9 @@ var mailin = require("mailin");
 var config = require("config");
 var log = require("npmlog");
 var util = require("./utils");
-var sanitizeHtml = require("sanitize-html");
 var replyParser = require("node-email-reply-parser");
 var _ = require("lodash");
 var MessageType = require("./MessageType");
-
-// Much of this is based off of matrix-react-sdk's HtmlUtils
-// https://github.com/matrix-org/matrix-react-sdk/blob/41936a957fdc5250d7c6c68d87ea4b21896080b0/src/HtmlUtils.js#L83-L140
-const sanitizerOptions = {
-    allowedTags: [
-        'font',
-        'del',
-        'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'p', 'a', 'ul', 'ol',
-        'nl', 'li', 'b', 'i', 'u', 'strong', 'em', 'strike', 'code', 'hr', 'br', 'div',
-        'table', 'thead', 'caption', 'tbody', 'tr', 'th', 'td', 'pre'
-    ],
-    allowedAttributes: {
-        // custom ones first:
-        font: ['color'], // custom to matrix
-        a: ['href', 'name', 'target', 'rel']
-    },
-    // Lots of these won't come up by default because we don't allow them
-    selfClosing: ['img', 'br', 'hr', 'area', 'base', 'basefont', 'input', 'link', 'meta'],
-    allowedSchemes: ['http', 'https', 'ftp', 'mailto'],
-
-    // DO NOT USE. sanitize-html allows all URL starting with '//'
-    // so this will always allow links to whatever scheme the
-    // host page is served over.
-    allowedSchemesByTag: {},
-};
 
 /**
  * Processes inbound email for sending to Matrix rooms
@@ -181,7 +155,7 @@ class EmailHandler {
 
                     var contentTypeHeader = (message.headers['content-type'] || "text/plain").toLowerCase();
                     var isHtml = contentTypeHeader.indexOf("text/plain") !== 0;
-                    var htmlBody = sanitizeHtml(message.html, sanitizerOptions);
+                    var htmlBody = message.html;
                     var textBody = message.text;
                     var fullTextBody = message.text;
 
