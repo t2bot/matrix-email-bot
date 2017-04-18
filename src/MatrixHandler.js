@@ -133,8 +133,10 @@ class MatrixHandler {
             if (property == "html_body")
                 val = sanitizeHtml(val, sanitizerOptions);
 
-            mtxMessage = mtxMessage.replace("$" + property, val);
-            if (plainMtxMessage) plainMtxMessage = plainMtxMessage.replace("$" + property, val);
+            var propertyRegex = new RegExp(("$" + property).replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), "g");
+
+            mtxMessage = mtxMessage.replace(propertyRegex, val);
+            if (plainMtxMessage) plainMtxMessage = plainMtxMessage.replace(propertyRegex, val);
         }
 
         var mtxContent = {
