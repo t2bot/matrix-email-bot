@@ -133,6 +133,13 @@ defaultRoomConfig:
   # The format used for fragments (replies, etc). Same condition variables as messageFormat.
   fragmentFormat: "$text_body"
 
+  # These next two are optional, and are disabled by default to avoid conflicts in messaging.
+  # They are used to represent the 'plain text' version of the message. These are used over
+  # the above two formats when sending plain text only messages and when sending the plain
+  # text version of the matrix event (which is used by bridges, such as the IRC bridge).
+  #messagePlainFormat: "$subject | https://email.t2bot.io/m/$id"
+  #fragmentPlainFormat: "$text_body"
+
   # The antispam settings to use for the room
   antispam:
     # The maximum spam score to tolerate for the room. This is on a sliding scale according to

@@ -119,21 +119,32 @@ class MatrixHandler {
             }
         }
 
+        var plainMtxMessage = config.messagePlainFormat;
+        if (messageType != MessageType.PRIMARY) {
+            plainMtxMessage = config[messageType.toString().toLowerCase() + "PlainFormat"];
+            if (!plainMtxMessage) {
+                log.warn("MatrixHandler", "Could not find plain text format for message type '" + messageType.toString() + "', using fragmentPlainFormat");
+                plainMtxMessage = config["fragmentPlainFormat"];
+            }
+        }
+
         for (var property in message) {
             var val = message[property];
             if (property == "html_body")
                 val = sanitizeHtml(val, sanitizerOptions);
+
             mtxMessage = mtxMessage.replace("$" + property, val);
+            if (plainMtxMessage) plainMtxMessage = plainMtxMessage.replace("$" + property, val);
         }
 
         var mtxContent = {
-            body: mtxMessage,
+            body: plainMtxMessage || mtxMessage,
             msgtype: "m.text"
         };
 
         if (!config.plaintextOnly) {
             log.info("MatrixHandler", "Preparing HTML message for room " + roomId);
-            mtxContent["body"] = striptags(mtxContent.body);
+            mtxContent["body"] = plainMtxMessage || striptags(mtxContent.body);
             mtxContent["formatted_body"] = mtxMessage.replace(/\n/g, '<br/>'); // clients are responsible for processing the HTML
             mtxContent["format"] = "org.matrix.custom.html";
         }
