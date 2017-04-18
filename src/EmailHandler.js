@@ -187,13 +187,8 @@ class EmailHandler {
                         }
                     } else {
                         for (var dbMessage of dbMessages) {
-                            this._db.writeMessage(dbMessage).then(msg=> {
-                                log.info("EmailHandler", "Message saved. Id = " + msg.id);
-                                matrix.postMessageToRoom(msg, roomConfig.roomId, msgType);
-                                msgType = MessageType.FRAGMENT;
-
-                                this._saveAttachments(attachments, msg);
-                            });
+                            this._writeAndPostMessage(dbMessage, roomConfig, msgType, attachments);
+                            msgType = MessageType.FRAGMENT;
                         }
                     }
 
@@ -205,6 +200,15 @@ class EmailHandler {
             }
         }, err => {
             log.error("EmailHandler", "Error checking for message: " + err);
+        });
+    }
+
+    _writeAndPostMessage(dbMessage, roomConfig, msgType, attachments){
+        this._db.writeMessage(dbMessage).then(msg=> {
+            log.info("EmailHandler", "Message saved. Id = " + msg.id);
+            this._matrix.postMessageToRoom(msg, roomConfig.roomId, msgType);
+
+            this._saveAttachments(attachments, msg);
         });
     }
 
