@@ -1,4 +1,7 @@
 # matrix-email-bot
+
+[![Greenkeeper badge](https://badges.greenkeeper.io/turt2live/matrix-email-bot.svg)](https://greenkeeper.io/)
+
 A bot that posts messages to rooms when an email is received. Ideal for uses where a short message is desired in a chat room when a newsletter goes out.
 
 Questions? Ask away in [#email:t2bot.io](https://matrix.to/#/#email:t2bot.io)
