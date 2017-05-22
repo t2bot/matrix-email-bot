@@ -12,7 +12,7 @@
     "lodash": "^4.17.4",
     "mailin": "^3.0.3",
     "mailparser": "^2.0.2",
-    "matrix-js-sdk": "^0.7.2",
+    "matrix-js-sdk": "^0.7.8",
     "node-email-reply-parser": "^0.0.1",
     "npmlog": "^4.0.2",
     "pug": "^0.1.0",
