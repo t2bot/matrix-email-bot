@@ -15,7 +15,7 @@
     "matrix-js-sdk": "^0.7.8",
     "node-email-reply-parser": "^0.0.1",
     "npmlog": "^4.0.2",
-    "pug": "^0.1.0",
+    "pug": "^2.0.0-rc.2",
     "request": "^2.79.0",
     "sanitize-html": "^1.14.1",
     "sqlite3": "^3.1.8",
