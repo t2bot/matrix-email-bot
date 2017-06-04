@@ -1,6 +1,6 @@
 var mailin = require("mailin");
 var config = require("config");
-var log = require("npmlog");
+var log = require("./LogService");
 var util = require("./utils");
 var replyParser = require("node-email-reply-parser");
 var _ = require("lodash");

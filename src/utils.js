@@ -1,5 +1,5 @@
 var config = require("config");
-var log = require("npmlog");
+var log = require("./LogService");
 var extend = require("extend");
 
 class Utils {

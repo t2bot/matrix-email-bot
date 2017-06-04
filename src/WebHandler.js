@@ -1,6 +1,6 @@
 var express = require('express');
 var config = require("config");
-var log = require("npmlog");
+var log = require("./LogService");
 var mailparser = require("mailparser").simpleParser;
 
 /**

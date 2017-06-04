@@ -1,7 +1,7 @@
 var sqlite3 = require('sqlite3');
 var uuid = require("uuid");
 var DBMigrate = require("db-migrate");
-var log = require("npmlog");
+var log = require("./LogService");
 var fs = require("fs");
 var path = require("path");
 
