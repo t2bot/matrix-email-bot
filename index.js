@@ -2,7 +2,7 @@ var DataStore = require("./src/DataStore");
 var EmailHandler = require("./src/EmailHandler");
 var MatrixHandler = require("./src/MatrixHandler");
 var WebHandler = require("./src/WebHandler");
-var log = require("npmlog");
+var log = require("./src/LogService");
 
 log.info("index", "Creating and preparing database");
 
