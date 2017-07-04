@@ -20,7 +20,7 @@
     "mailparser": "^2.0.5",
     "matrix-js-sdk": "^0.7.13",
     "moment": "^2.18.1",
-    "node-email-reply-parser": "^0.0.1",
+    "node-email-reply-parser": "^0.1.0",
     "pug": "^2.0.0-rc.2",
     "request": "^2.81.0",
     "sanitize-html": "^1.14.1",
