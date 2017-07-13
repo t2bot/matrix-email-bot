@@ -2,7 +2,7 @@
  * Posts a received message to the bot for processing.
  * Message can be read from STDIN or file.
  */
-var log = require("npmlog");
+var log = require("./src/LogService");
 var config = require("config");
 var fs = require("fs");
 var request = require("request");
