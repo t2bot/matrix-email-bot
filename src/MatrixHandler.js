@@ -6,6 +6,7 @@ var util = require("./utils");
 var MessageType = require("./MessageType");
 var streamifier = require("streamifier");
 var sanitizeHtml = require("sanitize-html");
+var _ = require("lodash");
 
 // Much of this is based off of matrix-react-sdk's HtmlUtils
 // https://github.com/matrix-org/matrix-react-sdk/blob/41936a957fdc5250d7c6c68d87ea4b21896080b0/src/HtmlUtils.js#L83-L140
@@ -49,17 +50,15 @@ class MatrixHandler {
             userId: this._userId
         });
 
-        this._client.on('sync', function (state, prevState, data) {
+        this._client.on('sync', (state, prevState, data) => {
             switch (state) {
                 case 'PREPARED':
                     this._updateRoomList();
                     break;
             }
-        }.bind(this));
+        });
 
-        this._client.on('Room', function () {
-            this._updateRoomList();
-        }.bind(this));
+        this._client.on('Room', this._updateRoomList.bind(this));
 
         this._client.startClient(25); // limit number of messages to keep, we're not interesting in keeping history here
     }
@@ -73,18 +72,22 @@ class MatrixHandler {
         var roomList = [];
 
         var rooms = this._client.getRooms();
-        for (var room of rooms) {
+        _.forEach(rooms, room => {
             var me = room.getMember(this._userId);
-            if (!me)continue;
+            if (!me) return;
 
             if (me.membership == "invite") {
-                this._client.joinRoom(room.currentState.roomId);
-                continue;
+                log.info("MatrixHandler", "Received invite to " + room.currentState.roomId);
+                this._client.joinRoom(room.currentState.roomId).catch(error => {
+                    log.error("MatrixHandler", "Error joining room " + room.currentState.roomId);
+                    log.error("MatrixHandler", error);
+                });
+                return;
             }
 
-            if (me.membership != "join")continue;
+            if (me.membership != "join") return;
             roomList.push(room.currentState.roomId);
-        }
+        });
 
         this._roomList = roomList;
         log.info("MatrixHandler - _updateRoomList", "Currently in " + this._roomList.length + " rooms");
