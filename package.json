@@ -18,7 +18,7 @@
     "lodash": "^4.17.4",
     "mailin": "^3.0.4",
     "mailparser": "^2.0.5",
-    "matrix-js-sdk": "^0.7.13",
+    "matrix-js-sdk": "^0.8.0",
     "moment": "^2.18.1",
     "node-email-reply-parser": "^0.1.0",
     "pug": "^2.0.0-rc.2",
