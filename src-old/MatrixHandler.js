@@ -1,7 +1,7 @@
 const config = require("config");
 const sdk = require("matrix-js-sdk");
 const striptags = require("striptags");
-const log = require("./LogService");
+import LogService from "matrix-js-snippets/lib/LogService";
 const util = require("./utils");
 const MessageType = require("./MessageType");
 const streamifier = require("streamifier");
@@ -68,7 +68,7 @@ class MatrixHandler {
      * @private
      */
     _updateRoomList() {
-        log.info("MatrixHandler - _updateRoomList", "Updating room list");
+        LogService.info("MatrixHandler - _updateRoomList", "Updating room list");
         const roomList = [];
 
         const rooms = this._client.getRooms();
@@ -77,10 +77,10 @@ class MatrixHandler {
             if (!me) return;
 
             if (me.membership === "invite") {
-                log.info("MatrixHandler", "Received invite to " + room.currentState.roomId);
+                LogService.info("MatrixHandler", "Received invite to " + room.currentState.roomId);
                 this._client.joinRoom(room.currentState.roomId).catch(error => {
-                    log.error("MatrixHandler", "Error joining room " + room.currentState.roomId);
-                    log.error("MatrixHandler", error);
+                    LogService.error("MatrixHandler", "Error joining room " + room.currentState.roomId);
+                    LogService.error("MatrixHandler", error);
                 });
                 return;
             }
@@ -90,7 +90,7 @@ class MatrixHandler {
         });
 
         this._roomList = roomList;
-        log.info("MatrixHandler - _updateRoomList", "Currently in " + this._roomList.length + " rooms");
+        LogService.info("MatrixHandler - _updateRoomList", "Currently in " + this._roomList.length + " rooms");
     }
 
     /**
@@ -103,13 +103,13 @@ class MatrixHandler {
         if (!messageType) messageType = MessageType.PRIMARY;
 
         if (this._roomList.indexOf(roomId) === -1) {
-            log.warn("MatrixHandler", "Attempt to send message to room " + roomId + ", but not in that room");
+            LogService.warn("MatrixHandler", "Attempt to send message to room " + roomId + ", but not in that room");
             return; // not in room - skip message
         }
 
         let config = util.getRoomConfig(roomId);
         if (!config) {
-            log.error("MatrixHandler", "No configuration for room " + roomId + ", but a message was supposed to go there");
+            LogService.error("MatrixHandler", "No configuration for room " + roomId + ", but a message was supposed to go there");
             return;
         }
 
@@ -117,7 +117,7 @@ class MatrixHandler {
         if (messageType !== MessageType.PRIMARY) {
             mtxMessage = config[messageType.toString().toLowerCase() + "Format"];
             if (!mtxMessage) {
-                log.warn("MatrixHandler", "Could not find format for message type '" + messageType.toString() + "', using fragmentFormat");
+                LogService.warn("MatrixHandler", "Could not find format for message type '" + messageType.toString() + "', using fragmentFormat");
                 mtxMessage = config["fragmentFormat"];
             }
         }
@@ -126,7 +126,7 @@ class MatrixHandler {
         if (messageType !== MessageType.PRIMARY) {
             plainMtxMessage = config[messageType.toString().toLowerCase() + "PlainFormat"];
             if (!plainMtxMessage) {
-                log.warn("MatrixHandler", "Could not find plain text format for message type '" + messageType.toString() + "', using fragmentPlainFormat");
+                LogService.warn("MatrixHandler", "Could not find plain text format for message type '" + messageType.toString() + "', using fragmentPlainFormat");
                 plainMtxMessage = config["fragmentPlainFormat"];
             }
         }
@@ -148,13 +148,13 @@ class MatrixHandler {
         };
 
         if (!config.plaintextOnly) {
-            log.info("MatrixHandler", "Preparing HTML message for room " + roomId);
+            LogService.info("MatrixHandler", "Preparing HTML message for room " + roomId);
             mtxContent["body"] = plainMtxMessage || striptags(mtxContent.body);
             mtxContent["formatted_body"] = mtxMessage.replace(/\n/g, '<br/>'); // clients are responsible for processing the HTML
             mtxContent["format"] = "org.matrix.custom.html";
         }
 
-        log.info("MatrixHandler", "Sending message to room " + roomId);
+        LogService.info("MatrixHandler", "Sending message to room " + roomId);
         this._client.sendMessage(roomId, mtxContent);
     }
 
@@ -164,15 +164,15 @@ class MatrixHandler {
      * @param {String} roomId the room ID to post to
      */
     postAttachmentToRoom(attachment, roomId) {
-        log.info("MatrixHandler", "Posting attachment '" + attachment.name + "' to room " + roomId);
+        LogService.info("MatrixHandler", "Posting attachment '" + attachment.name + "' to room " + roomId);
         if (this._roomList.indexOf(roomId) === -1) {
-            log.warn("MatrixHandler", "Attempt to send message to room " + roomId + ", but not in that room");
+            LogService.warn("MatrixHandler", "Attempt to send message to room " + roomId + ", but not in that room");
             return; // not in room - skip message
         }
 
         let config = util.getRoomConfig(roomId);
         if (!config) {
-            log.error("MatrixHandler", "No configuration for room " + roomId + ", but a message was supposed to go there");
+            LogService.error("MatrixHandler", "No configuration for room " + roomId + ", but a message was supposed to go there");
             return;
         }
 
@@ -181,12 +181,12 @@ class MatrixHandler {
             eventType = config["attachments"]["contentMapping"][attachment.type];
         }
 
-        log.info("MatrixHandler", "Uploading attachment '" + attachment.name + "' to room " + roomId);
+        LogService.info("MatrixHandler", "Uploading attachment '" + attachment.name + "' to room " + roomId);
         this._client.uploadContent({
             stream: streamifier.createReadStream(attachment.content),
             name: attachment.name
         }).then(url => {
-            log.info("MatrixHandler", "Got MXC URL for '" + attachment.name + "': " + url);
+            LogService.info("MatrixHandler", "Got MXC URL for '" + attachment.name + "': " + url);
             const content = {
                 msgtype: eventType,
                 body: attachment.name,
@@ -195,7 +195,7 @@ class MatrixHandler {
                     mimetype: attachment.type
                 }
             };
-            log.info("MatrixHandler", "Posting attachment '" + attachment.name + "' to room " + roomId + " as event type " + eventType);
+            LogService.info("MatrixHandler", "Posting attachment '" + attachment.name + "' to room " + roomId + " as event type " + eventType);
             this._client.sendMessage(roomId, content);
         });
     }

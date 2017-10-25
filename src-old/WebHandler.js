@@ -1,6 +1,6 @@
 const express = require('express');
 const config = require("config");
-const log = require("./LogService");
+import LogService from "matrix-js-snippets/lib/LogService";
 const mailparser = require("mailparser").simpleParser;
 
 /**
@@ -47,7 +47,7 @@ class WebHandler {
         this._app.set("view engine", "pug");
         this._app.listen(config.get("web.port"), config.get("web.bindIp"));
 
-        log.info("WebHandler", "Listening on " + config.get("web.bindIp") + ":" + config.get("web.port"));
+        LogService.info("WebHandler", "Listening on " + config.get("web.bindIp") + ":" + config.get("web.port"));
     }
 
     /**
@@ -57,7 +57,7 @@ class WebHandler {
      * @private
      */
     _apiGetMessage(request, response) {
-        log.info("WebHandler", "_apiGetMessage - Get " + request.params.id);
+        LogService.info("WebHandler", "_apiGetMessage - Get " + request.params.id);
         this._db.getMessage(request.params.id).then(message => {
             if (message) {
                 message.email_id = undefined; // redact message id from result
@@ -74,9 +74,9 @@ class WebHandler {
      * @private
      */
     _apiPostMessage(request, response) {
-        log.info("WebHandler", "_apiPostMessage - POST new message");
+        LogService.info("WebHandler", "_apiPostMessage - POST new message");
         if (request.query.secret !== config.get("web.secret")) {
-            log.warn("WebHandler", "_apiPostMessage - Invalid secret used");
+            LogService.warn("WebHandler", "_apiPostMessage - Invalid secret used");
             response.sendStatus(401);
             return;
         }
@@ -84,7 +84,7 @@ class WebHandler {
         const mailBody = request.text;
         mailparser(mailBody).then(mail => {
             if (!mail || !mail.messageId) {
-                log.error("WebHandler", "_apiPostMessage - Failed to parse message");
+                LogService.error("WebHandler", "_apiPostMessage - Failed to parse message");
                 response.sendStatus(500);
             } else {
                 mail.to = mail.to.value;
@@ -93,12 +93,12 @@ class WebHandler {
                 mail.bcc = (mail.bcc || {value: []}).value;
 
                 this._emailHandler.processMessage(mail);
-                log.info("WebHandler", "_apiPostMessage - Message processed");
+                LogService.info("WebHandler", "_apiPostMessage - Message processed");
                 response.sendStatus(200);
             }
         }).catch(err=> {
-            log.error("WebHandler", "_apiPostMessage - Error encountered parsing message");
-            log.error("WebHandler", err);
+            LogService.error("WebHandler", "_apiPostMessage - Error encountered parsing message");
+            LogService.error("WebHandler", err);
             response.sendStatus(500);
         });
     }
@@ -110,7 +110,7 @@ class WebHandler {
      * @private
      */
     _renderMessage(request, response) {
-        log.info("WebHandler", "_renderMessage - Get " + request.params.id);
+        LogService.info("WebHandler", "_renderMessage - Get " + request.params.id);
         this._db.getMessage(request.params.id).then(message => {
             if (message) {
                 response.render("message", {title: message.subject, message: message});

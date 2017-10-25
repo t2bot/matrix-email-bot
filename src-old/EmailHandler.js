@@ -1,6 +1,6 @@
 const mailin = require("mailin");
 const config = require("config");
-const log = require("./LogService");
+import LogService from "matrix-js-snippets/lib/LogService";
 const util = require("./utils");
 const replyParser = require("node-email-reply-parser");
 const _ = require("lodash");
@@ -53,7 +53,7 @@ class EmailHandler {
 
             const primaryFrom = message.from[0];
 
-            log.info("EmailHandler", "Processing message from " + primaryFrom.address + " (sent to " + emailTargets.length + " targets)");
+            LogService.info("EmailHandler", "Processing message from " + primaryFrom.address + " (sent to " + emailTargets.length + " targets)");
 
             const rooms = [];
             for (let target of emailTargets) {
@@ -61,38 +61,38 @@ class EmailHandler {
 
                 let roomConfigs = util.getRoomConfigsForTarget(target.address, target.source);
                 if (!roomConfigs) {
-                    log.warn("EmailHandler", "No configurations for target (may not be allowed) " + target.address);
+                    LogService.warn("EmailHandler", "No configurations for target (may not be allowed) " + target.address);
                     continue;
                 }
 
                 for (let roomConfig of roomConfigs) {
-                    log.info("EmailHandler", "Processing room config for room: " + roomConfig.roomId);
+                    LogService.info("EmailHandler", "Processing room config for room: " + roomConfig.roomId);
 
                     if (rooms.indexOf(roomConfig.roomId) !== -1) {
-                        log.warn("EmailHandler", "Not handling duplicate message for room " + roomConfig.roomId);
+                        LogService.warn("EmailHandler", "Not handling duplicate message for room " + roomConfig.roomId);
                         continue;
                     }
 
                     if (roomConfig["antispam"]) {
-                        log.info("EmailHandler", "Performing antispam checks");
+                        LogService.info("EmailHandler", "Performing antispam checks");
 
                         if (roomConfig["antispam"]["maxScore"] > 0 && roomConfig["antispam"]["maxScore"] <= message.spamScore) {
-                            log.warn("EmailHandler", "Spam email detected (" + message.spamScore + " is beyond threshold of " + roomConfig["antispam"]["maxScore"] + "): Voiding message");
+                            LogService.warn("EmailHandler", "Spam email detected (" + message.spamScore + " is beyond threshold of " + roomConfig["antispam"]["maxScore"] + "): Voiding message");
                             continue;
-                        } else log.info("EmailHandler", "Spam score is within threshold: " + message.spamScore + " < " + roomConfig["antispam"]["maxScore"]);
+                        } else LogService.info("EmailHandler", "Spam score is within threshold: " + message.spamScore + " < " + roomConfig["antispam"]["maxScore"]);
 
                         if (roomConfig["antispam"]["blockFailedDkim"] && message.dkim !== "pass") {
-                            log.warn("EmailHandler", "Spam email detected (DKIM failure): Voiding message");
+                            LogService.warn("EmailHandler", "Spam email detected (DKIM failure): Voiding message");
                             continue;
-                        } else log.info("EmailHandler", "DKIM check passed (enabled = " + roomConfig["antispam"]["blockFailedDkim"] + ")");
+                        } else LogService.info("EmailHandler", "DKIM check passed (enabled = " + roomConfig["antispam"]["blockFailedDkim"] + ")");
 
                         if (roomConfig["antispam"]["blockFailedSpf"] && message.spf !== "pass") {
-                            log.warn("EmailHandler", "Spam email detected (SPF failure): Voiding message");
+                            LogService.warn("EmailHandler", "Spam email detected (SPF failure): Voiding message");
                             continue;
-                        } else log.info("EmailHandler", "SPF check passed (enabled = " + roomConfig["antispam"]["blockFailedSpf"] + ")");
+                        } else LogService.info("EmailHandler", "SPF check passed (enabled = " + roomConfig["antispam"]["blockFailedSpf"] + ")");
                     }
 
-                    log.info("EmailHandler", "Message passed room's antispam measures");
+                    LogService.info("EmailHandler", "Message passed room's antispam measures");
 
                     let allowed = true;
                     if (!roomConfig.allowFromAnyone) {
@@ -100,13 +100,13 @@ class EmailHandler {
                             if (!fromAddress.address)continue;
 
                             if (roomConfig.allowedSenders.indexOf(fromAddress.address.toLowerCase()) === -1) {
-                                log.warn("EmailHandler", "Ignoring from address " + fromAddress.address + " - not on allowed senders list");
+                                LogService.warn("EmailHandler", "Ignoring from address " + fromAddress.address + " - not on allowed senders list");
                                 allowed = false;
                                 break;
                             }
                         }
                     } else {
-                        log.info("EmailHandler", "Room is set to allow mail from anyone: " + roomConfig.roomId);
+                        LogService.info("EmailHandler", "Room is set to allow mail from anyone: " + roomConfig.roomId);
                         allowed = true;
                     }
 
@@ -115,14 +115,14 @@ class EmailHandler {
                         if (!fromAddress.address)continue;
 
                         if (roomConfig.blockedSenders.indexOf(fromAddress.address.toLowerCase()) !== -1) {
-                            log.warn("EmailHandler", "Ignoring from address " + fromAddress.address + " - sender is blocked");
+                            LogService.warn("EmailHandler", "Ignoring from address " + fromAddress.address + " - sender is blocked");
                             allowed = false;
                             break;
                         }
                     }
 
                     if (!allowed) {
-                        log.warn("EmailHandler", "Blocking email to room " + roomConfig.roomId + ": sender is not allowed");
+                        LogService.warn("EmailHandler", "Blocking email to room " + roomConfig.roomId + ": sender is not allowed");
                         continue;
                     }
 
@@ -132,12 +132,12 @@ class EmailHandler {
                         const blockedTypes = (roomConfig["attachments"]["blockedTypes"] || []);
                         for (let attachment of message.attachments) {
                             if (!roomConfig["attachments"]["allowAllTypes"] && allowedTypes.indexOf(attachment.contentType) === -1) {
-                                log.warn("EmailHandler", "Not processing attachment '" + attachment.generatedFileName + "': Content type '" + attachment.contentType + "' is not allowed");
+                                LogService.warn("EmailHandler", "Not processing attachment '" + attachment.generatedFileName + "': Content type '" + attachment.contentType + "' is not allowed");
                                 continue;
                             }
 
                             if (blockedTypes.indexOf(attachment.contentType) !== -1) {
-                                log.warn("EmailHandler", "Not processing attachment '" + attachment.generatedFileName + "': Content type '" + attachment.contentType + "' is blocked");
+                                LogService.warn("EmailHandler", "Not processing attachment '" + attachment.generatedFileName + "': Content type '" + attachment.contentType + "' is blocked");
                                 continue;
                             }
 
@@ -148,8 +148,8 @@ class EmailHandler {
                                 type: attachment.contentType
                             });
                         }
-                    } else log.warn("EmailHandler", "Not processing attachments: Either no attachments or posting is not permitted");
-                    log.info("EmailHandler", "Found " + attachments.length + " valid attachments");
+                    } else LogService.warn("EmailHandler", "Not processing attachments: Either no attachments or posting is not permitted");
+                    LogService.info("EmailHandler", "Found " + attachments.length + " valid attachments");
 
                     rooms.push(roomConfig.roomId);
 
@@ -180,7 +180,7 @@ class EmailHandler {
                     let matrix = this._matrix;
                     let msgType = MessageType.PRIMARY;
                     if (roomConfig.skipDatabase) {
-                        log.info("EmailHandler", "Message skipped database: Posting message as-is to room");
+                        LogService.info("EmailHandler", "Message skipped database: Posting message as-is to room");
                         for (let dbMessage of dbMessages) {
                             matrix.postMessageToRoom(dbMessage, roomConfig.roomId, msgType);
                             msgType = MessageType.FRAGMENT;
@@ -199,13 +199,13 @@ class EmailHandler {
                 }
             }
         }, err => {
-            log.error("EmailHandler", "Error checking for message: " + err);
+            LogService.error("EmailHandler", "Error checking for message: " + err);
         });
     }
 
     _writeAndPostMessage(dbMessage, roomConfig, msgType, attachments){
         this._db.writeMessage(dbMessage).then(msg=> {
-            log.info("EmailHandler", "Message saved. Id = " + msg.id);
+            LogService.info("EmailHandler", "Message saved. Id = " + msg.id);
             this._matrix.postMessageToRoom(msg, roomConfig.roomId, msgType);
 
             this._saveAttachments(attachments, msg);
@@ -214,7 +214,7 @@ class EmailHandler {
 
     _saveAttachments(attachments, message) {
         for (let attachment of attachments) {
-            log.info("EmailHandler", "Linking " + attachment.name + " to message " + message.id);
+            LogService.info("EmailHandler", "Linking " + attachment.name + " to message " + message.id);
             this._db.saveAttachment(attachment, message.id);
         }
     }

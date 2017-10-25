@@ -1,7 +1,7 @@
 const sqlite3 = require('sqlite3');
 const uuid = require("uuid");
 const DBMigrate = require("db-migrate");
-const log = require("./LogService");
+import LogService from "matrix-js-snippets/lib/LogService";
 const fs = require("fs");
 const path = require("path");
 
@@ -23,19 +23,19 @@ class DataStore {
      * @returns {Promise} resolved when ready, rejected if there's an error
      */
     prepare() {
-        log.info("DataStore", "Starting migration");
+        LogService.info("DataStore", "Starting migration");
         return new Promise((resolve, reject)=> {
             const dbMigrate = DBMigrate.getInstance(true, {
                 config: "./config/database.json",
                 env: process.env.NODE_ENV || "development"
             });
             dbMigrate.up().then(()=> {
-                log.info("DataStore", "Migrated up");
+                LogService.info("DataStore", "Migrated up");
                 this._db = new sqlite3.Database("./db/" + (process.env.NODE_ENV || "development") + ".db");
                 resolve();
             }, err => {
-                log.error("DataStore", "Failed to migrate up");
-                log.error("DataStore", err);
+                LogService.error("DataStore", "Failed to migrate up");
+                LogService.error("DataStore", err);
                 reject(err);
             });
         });
@@ -49,7 +49,7 @@ class DataStore {
     checkMessageNotExists(messageId) {
         return new Promise((resolve, reject)=> {
             this._db.get("SELECT id FROM emails WHERE email_id = ?", messageId, function (err, row) {
-                log.info("DataStore", "checkMessageNotExists - found message " + messageId + "? " + (!!row));
+                LogService.info("DataStore", "checkMessageNotExists - found message " + messageId + "? " + (!!row));
                 if (err) reject(err);
                 else if (row) reject(new Error("Message already exists"));
                 else resolve();
@@ -74,7 +74,7 @@ class DataStore {
      * @see #writeMessage
      */
     prepareMessage(messageId, fromAddress, fromName, toAddress, toName, subject, text, html, fullTextBody, isHtml, roomId) {
-        log.info("DataStore", "prepareMessage - creating for message ID " + messageId);
+        LogService.info("DataStore", "prepareMessage - creating for message ID " + messageId);
         return {
             email_id: messageId,
             from_name: fromName || "",
@@ -96,13 +96,13 @@ class DataStore {
      * @returns {Promise} resolves with the implementation message written (eg: DB object), rejected if writing fails
      */
     writeMessage(message) {
-        log.info("DataStore", "writeMessage - Starting write for " + message.email_id);
+        LogService.info("DataStore", "writeMessage - Starting write for " + message.email_id);
         return new Promise((resolve, reject)=> {
             const id = uuid.v4();
             this._db.run("INSERT INTO emails (id, email_id, from_email, from_name, to_email, to_name, subject, text_body, html_body, full_text_body, is_html, received_timestamp, target_room) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, ?)",
                 id, message.email_id, message.from_email, message.from_name, message.to_email, message.to_name, message.subject, message.text_body, message.html_body, message.full_text_body, message.is_html, message.target_room,
                 function (generatedId, error) {
-                    log.info("DataStore", "writeMessage - Message written (" + (!error) + "): " + id + " (" + message.email_id + ")");
+                    LogService.info("DataStore", "writeMessage - Message written (" + (!error) + "): " + id + " (" + message.email_id + ")");
                     if (error)reject(error);
                     else this.getMessage(id).then(resolve, reject);
                 }.bind(this));
@@ -115,16 +115,16 @@ class DataStore {
      * @param {String} messageId the message ID to link the attachment to
      */
     saveAttachment(attachment, messageId) {
-        log.info("DataStore", "saveAttachment - Starting write for " + attachment.name);
+        LogService.info("DataStore", "saveAttachment - Starting write for " + attachment.name);
         return new Promise((resolve, reject) => {
             const id = uuid.v4();
             const target = path.join(".", "db", "attachments", id + ".attachment");
             fs.writeFileSync(target, attachment.content);
-            log.info("DataStore", "saveAttachment - Attachment written to file: " + target);
+            LogService.info("DataStore", "saveAttachment - Attachment written to file: " + target);
             this._db.run("INSERT INTO attachments (id, email_id, file_name, content_type) VALUES (?, ?, ?, ?)",
                 id, messageId, attachment.name, attachment.type,
                 function (generatedId, error) {
-                log.info("DataStore", "saveAttachment - Attachment saved to DB (" + (!error) + ": " + id + " to message " + messageId);
+                LogService.info("DataStore", "saveAttachment - Attachment saved to DB (" + (!error) + ": " + id + " to message " + messageId);
                 if (error)reject(error);
                 else resolve();
             }.bind(this));
@@ -137,10 +137,10 @@ class DataStore {
      * @returns {Promise} resolves with the raw record, rejected if there was an error
      */
     getMessage(id) {
-        log.info("DataStore", "getMessage - Fetch " + id);
+        LogService.info("DataStore", "getMessage - Fetch " + id);
         return new Promise((resolve, reject)=> {
             this._db.get("SELECT * FROM emails WHERE id = ?", id, function (err, row) {
-                log.info("DataStore", "getMessage - Found " + id + "? " + (!!row));
+                LogService.info("DataStore", "getMessage - Found " + id + "? " + (!!row));
                 if (err)reject(err);
                 else resolve(row);
             });
