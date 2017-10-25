@@ -7,6 +7,7 @@
     "url": "git+https://github.com/turt2live/matrix-email-bot.git"
   },
   "dependencies": {
+    "babel-runtime": "^6.26.0",
     "chalk": "^2.3.0",
     "config": "^1.27.0",
     "db-migrate": "^0.10.0-beta.24",
