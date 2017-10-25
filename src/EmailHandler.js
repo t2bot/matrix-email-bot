@@ -1,10 +1,10 @@
-var mailin = require("mailin");
-var config = require("config");
-var log = require("./LogService");
-var util = require("./utils");
-var replyParser = require("node-email-reply-parser");
-var _ = require("lodash");
-var MessageType = require("./MessageType");
+const mailin = require("mailin");
+const config = require("config");
+const log = require("./LogService");
+const util = require("./utils");
+const replyParser = require("node-email-reply-parser");
+const _ = require("lodash");
+const MessageType = require("./MessageType");
 
 /**
  * Processes inbound email for sending to Matrix rooms
@@ -42,21 +42,21 @@ class EmailHandler {
      */
     processMessage(message) {
         this._db.checkMessageNotExists(message.messageId).then(() => {
-            var emailTargets = [];
+            const emailTargets = [];
 
-            for (var email of (message.to || []))
+            for (let email of (message.to || []))
                 emailTargets.push({address: email.address, name: email.name, source: 'to'});
-            for (var email of (message.cc || []))
+            for (let email of (message.cc || []))
                 emailTargets.push({address: email.address, name: email.name, source: 'cc'});
-            for (var email of (message.bcc || []))
+            for (let email of (message.bcc || []))
                 emailTargets.push({address: email.address, name: email.name, source: 'bcc'});
 
-            var primaryFrom = message.from[0];
+            const primaryFrom = message.from[0];
 
             log.info("EmailHandler", "Processing message from " + primaryFrom.address + " (sent to " + emailTargets.length + " targets)");
 
-            var rooms = [];
-            for (var target of emailTargets) {
+            const rooms = [];
+            for (let target of emailTargets) {
                 if (!target.address) continue; // skip address - no processing
 
                 let roomConfigs = util.getRoomConfigsForTarget(target.address, target.source);
@@ -65,7 +65,7 @@ class EmailHandler {
                     continue;
                 }
 
-                for (var roomConfig of roomConfigs) {
+                for (let roomConfig of roomConfigs) {
                     log.info("EmailHandler", "Processing room config for room: " + roomConfig.roomId);
 
                     if (rooms.indexOf(roomConfig.roomId) !== -1) {
@@ -94,9 +94,9 @@ class EmailHandler {
 
                     log.info("EmailHandler", "Message passed room's antispam measures");
 
-                    var allowed = true;
+                    let allowed = true;
                     if (!roomConfig.allowFromAnyone) {
-                        for (var fromAddress of message.from) {
+                        for (let fromAddress of message.from) {
                             if (!fromAddress.address)continue;
 
                             if (roomConfig.allowedSenders.indexOf(fromAddress.address.toLowerCase()) === -1) {
@@ -111,7 +111,7 @@ class EmailHandler {
                     }
 
                     // Check for blocked senders outside of the allowFromAnyone check
-                    for (var fromAddress of message.from) {
+                    for (let fromAddress of message.from) {
                         if (!fromAddress.address)continue;
 
                         if (roomConfig.blockedSenders.indexOf(fromAddress.address.toLowerCase()) !== -1) {
@@ -126,11 +126,11 @@ class EmailHandler {
                         continue;
                     }
 
-                    var attachments = [];
+                    const attachments = [];
                     if (message.attachments) {
-                        var allowedTypes = (roomConfig["attachments"]["allowedTypes"] || []);
-                        var blockedTypes = (roomConfig["attachments"]["blockedTypes"] || []);
-                        for (var attachment of message.attachments) {
+                        const allowedTypes = (roomConfig["attachments"]["allowedTypes"] || []);
+                        const blockedTypes = (roomConfig["attachments"]["blockedTypes"] || []);
+                        for (let attachment of message.attachments) {
                             if (!roomConfig["attachments"]["allowAllTypes"] && allowedTypes.indexOf(attachment.contentType) === -1) {
                                 log.warn("EmailHandler", "Not processing attachment '" + attachment.generatedFileName + "': Content type '" + attachment.contentType + "' is not allowed");
                                 continue;
@@ -153,17 +153,17 @@ class EmailHandler {
 
                     rooms.push(roomConfig.roomId);
 
-                    var contentTypeHeader = (message.headers['content-type'] || "text/plain").toLowerCase();
-                    var isHtml = contentTypeHeader.indexOf("text/plain") !== 0;
-                    var htmlBody = message.html;
-                    var textBody = message.text;
-                    var fullTextBody = message.text;
+                    const contentTypeHeader = (message.headers['content-type'] || "text/plain").toLowerCase();
+                    const isHtml = contentTypeHeader.indexOf("text/plain") !== 0;
+                    const htmlBody = message.html;
+                    const textBody = message.text;
+                    const fullTextBody = message.text;
 
-                    var textSegments = [textBody];
+                    let textSegments = [textBody];
 
                     // can't trim HTML body nicely, so we won't bother
                     if (roomConfig.postReplies) {
-                        var fragments = replyParser(textBody).getFragments();
+                        const fragments = replyParser(textBody).getFragments();
                         textSegments = _.map(fragments, f => f.getContent());
                     } else {
                         textSegments = [replyParser(textBody, true)];
@@ -171,28 +171,28 @@ class EmailHandler {
 
                     textSegments = _.filter(textSegments, s => s.trim().length > 0);
 
-                    var dbMessages = [];
-                    for (var segment of textSegments) {
-                        var msg = this._db.prepareMessage(message.messageId, primaryFrom.address, primaryFrom.name, target.address, target.name, message.subject, segment, htmlBody, fullTextBody, isHtml, roomConfig.roomId);
+                    const dbMessages = [];
+                    for (let segment of textSegments) {
+                        const msg = this._db.prepareMessage(message.messageId, primaryFrom.address, primaryFrom.name, target.address, target.name, message.subject, segment, htmlBody, fullTextBody, isHtml, roomConfig.roomId);
                         dbMessages.push(msg);
                     }
 
                     let matrix = this._matrix;
-                    var msgType = MessageType.PRIMARY;
+                    let msgType = MessageType.PRIMARY;
                     if (roomConfig.skipDatabase) {
                         log.info("EmailHandler", "Message skipped database: Posting message as-is to room");
-                        for (var dbMessage of dbMessages) {
+                        for (let dbMessage of dbMessages) {
                             matrix.postMessageToRoom(dbMessage, roomConfig.roomId, msgType);
                             msgType = MessageType.FRAGMENT;
                         }
                     } else {
-                        for (var dbMessage of dbMessages) {
+                        for (let dbMessage of dbMessages) {
                             this._writeAndPostMessage(dbMessage, roomConfig, msgType, attachments);
                             msgType = MessageType.FRAGMENT;
                         }
                     }
 
-                    for (var attachment of attachments) {
+                    for (let attachment of attachments) {
                         if (!attachment.post) continue;
                         matrix.postAttachmentToRoom(attachment, roomConfig.roomId);
                     }
@@ -213,7 +213,7 @@ class EmailHandler {
     }
 
     _saveAttachments(attachments, message) {
-        for (var attachment of attachments) {
+        for (let attachment of attachments) {
             log.info("EmailHandler", "Linking " + attachment.name + " to message " + message.id);
             this._db.saveAttachment(attachment, message.id);
         }

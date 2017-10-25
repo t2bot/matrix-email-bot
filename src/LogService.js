@@ -1,8 +1,8 @@
-var winston = require("winston");
-var chalk = require("chalk");
-var config = require("config");
-var fs = require('fs');
-var moment = require('moment');
+const winston = require("winston");
+const chalk = require("chalk");
+const config = require("config");
+const fs = require('fs');
+const moment = require('moment');
 
 try {
     fs.mkdirSync('logs')
@@ -32,9 +32,9 @@ function getTimestamp() {
     return moment().format('MMM-D-YYYY HH:mm:ss.SSS Z');
 }
 
-var loggingConfig = config.get('logging');
+const loggingConfig = config.get('logging');
 
-var transports = [];
+const transports = [];
 transports.push(new (winston.transports.File)({
     json: false,
     name: "file",
@@ -57,7 +57,7 @@ if (loggingConfig.console) {
     }));
 }
 
-var log = new winston.Logger({
+const log = new winston.Logger({
     transports: transports,
     levels: {
         error: 0,
@@ -73,11 +73,11 @@ function doLog(level, module, messageOrObject) {
         messageOrObject = JSON.stringify(messageOrObject);
 
     if (messageOrObject instanceof Error) {
-        var err = messageOrObject;
+        const err = messageOrObject;
         messageOrObject = err.message + "\n" + err.stack;
     }
 
-    var message = "[" + module + "] " + messageOrObject;
+    const message = "[" + module + "] " + messageOrObject;
     log.log(level, message);
 }
 

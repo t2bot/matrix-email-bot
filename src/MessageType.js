@@ -1,4 +1,4 @@
-var Enum = require("es6-enum");
+const Enum = require("es6-enum");
 
 /**
  * Different types of messages that can be processed

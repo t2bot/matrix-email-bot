@@ -2,20 +2,20 @@
  * Posts a received message to the bot for processing.
  * Message can be read from STDIN or file.
  */
-var log = require("./src/LogService");
-var config = require("config");
-var fs = require("fs");
-var request = require("request");
+const log = require("./src/LogService");
+const config = require("config");
+const fs = require("fs");
+const request = require("request");
 
 process.argv = process.argv.splice(2);
 
 if (process.argv.length === 0) {
     log.info("post_message", "Using stdin as email source");
 
-    var data = "";
+    let data = "";
     process.stdin.setEncoding("utf8");
     process.stdin.on('readable', () => {
-        var chunk = process.stdin.read();
+        const chunk = process.stdin.read();
         if (chunk !== null) {
             data += chunk;
         }
@@ -37,7 +37,7 @@ if (process.argv.length === 0) {
 }
 
 function postMessage(body) {
-    var options = {
+    const options = {
         url: "http://localhost:" + config.get("web.port") + "/_m.email/api/v1/message",
         method: "POST",
         headers: {

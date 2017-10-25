@@ -1,7 +1,7 @@
-var express = require('express');
-var config = require("config");
-var log = require("./LogService");
-var mailparser = require("mailparser").simpleParser;
+const express = require('express');
+const config = require("config");
+const log = require("./LogService");
+const mailparser = require("mailparser").simpleParser;
 
 /**
  * Handles web requests
@@ -81,7 +81,7 @@ class WebHandler {
             return;
         }
 
-        var mailBody = request.text;
+        const mailBody = request.text;
         mailparser(mailBody).then(mail => {
             if (!mail || !mail.messageId) {
                 log.error("WebHandler", "_apiPostMessage - Failed to parse message");

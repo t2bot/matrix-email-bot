@@ -1,12 +1,12 @@
-var config = require("config");
-var sdk = require("matrix-js-sdk");
-var striptags = require("striptags");
-var log = require("./LogService");
-var util = require("./utils");
-var MessageType = require("./MessageType");
-var streamifier = require("streamifier");
-var sanitizeHtml = require("sanitize-html");
-var _ = require("lodash");
+const config = require("config");
+const sdk = require("matrix-js-sdk");
+const striptags = require("striptags");
+const log = require("./LogService");
+const util = require("./utils");
+const MessageType = require("./MessageType");
+const streamifier = require("streamifier");
+const sanitizeHtml = require("sanitize-html");
+const _ = require("lodash");
 
 // Much of this is based off of matrix-react-sdk's HtmlUtils
 // https://github.com/matrix-org/matrix-react-sdk/blob/41936a957fdc5250d7c6c68d87ea4b21896080b0/src/HtmlUtils.js#L83-L140
@@ -69,14 +69,14 @@ class MatrixHandler {
      */
     _updateRoomList() {
         log.info("MatrixHandler - _updateRoomList", "Updating room list");
-        var roomList = [];
+        const roomList = [];
 
-        var rooms = this._client.getRooms();
+        const rooms = this._client.getRooms();
         _.forEach(rooms, room => {
-            var me = room.getMember(this._userId);
+            let me = room.getMember(this._userId);
             if (!me) return;
 
-            if (me.membership == "invite") {
+            if (me.membership === "invite") {
                 log.info("MatrixHandler", "Received invite to " + room.currentState.roomId);
                 this._client.joinRoom(room.currentState.roomId).catch(error => {
                     log.error("MatrixHandler", "Error joining room " + room.currentState.roomId);
@@ -85,7 +85,7 @@ class MatrixHandler {
                 return;
             }
 
-            if (me.membership != "join") return;
+            if (me.membership !== "join") return;
             roomList.push(room.currentState.roomId);
         });
 
@@ -107,14 +107,14 @@ class MatrixHandler {
             return; // not in room - skip message
         }
 
-        var config = util.getRoomConfig(roomId);
+        let config = util.getRoomConfig(roomId);
         if (!config) {
             log.error("MatrixHandler", "No configuration for room " + roomId + ", but a message was supposed to go there");
             return;
         }
 
-        var mtxMessage = config.messageFormat;
-        if (messageType != MessageType.PRIMARY) {
+        let mtxMessage = config.messageFormat;
+        if (messageType !== MessageType.PRIMARY) {
             mtxMessage = config[messageType.toString().toLowerCase() + "Format"];
             if (!mtxMessage) {
                 log.warn("MatrixHandler", "Could not find format for message type '" + messageType.toString() + "', using fragmentFormat");
@@ -122,8 +122,8 @@ class MatrixHandler {
             }
         }
 
-        var plainMtxMessage = config.messagePlainFormat;
-        if (messageType != MessageType.PRIMARY) {
+        let plainMtxMessage = config.messagePlainFormat;
+        if (messageType !== MessageType.PRIMARY) {
             plainMtxMessage = config[messageType.toString().toLowerCase() + "PlainFormat"];
             if (!plainMtxMessage) {
                 log.warn("MatrixHandler", "Could not find plain text format for message type '" + messageType.toString() + "', using fragmentPlainFormat");
@@ -131,18 +131,18 @@ class MatrixHandler {
             }
         }
 
-        for (var property in message) {
-            var val = message[property];
-            if (property == "html_body")
+        for (let property of _.keys(message)) {
+            let val = message[property];
+            if (property === "html_body")
                 val = sanitizeHtml(val, sanitizerOptions);
 
-            var propertyRegex = new RegExp(("$" + property).replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), "g");
+            const propertyRegex = new RegExp(("$" + property).replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), "g");
 
             mtxMessage = mtxMessage.replace(propertyRegex, val);
             if (plainMtxMessage) plainMtxMessage = plainMtxMessage.replace(propertyRegex, val);
         }
 
-        var mtxContent = {
+        const mtxContent = {
             body: plainMtxMessage || mtxMessage,
             msgtype: "m.text"
         };
@@ -170,13 +170,13 @@ class MatrixHandler {
             return; // not in room - skip message
         }
 
-        var config = util.getRoomConfig(roomId);
+        let config = util.getRoomConfig(roomId);
         if (!config) {
             log.error("MatrixHandler", "No configuration for room " + roomId + ", but a message was supposed to go there");
             return;
         }
 
-        var eventType = "m.file";
+        let eventType = "m.file";
         if (config["attachments"]["contentMapping"][attachment.type]) {
             eventType = config["attachments"]["contentMapping"][attachment.type];
         }
@@ -187,7 +187,7 @@ class MatrixHandler {
             name: attachment.name
         }).then(url => {
             log.info("MatrixHandler", "Got MXC URL for '" + attachment.name + "': " + url);
-            var content = {
+            const content = {
                 msgtype: eventType,
                 body: attachment.name,
                 url: JSON.parse(url).content_uri,
