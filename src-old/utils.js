@@ -1,14 +1,14 @@
 const config = require("config");
-const log = require("./LogService");
+import LogService from "matrix-js-snippets/lib/LogService";
 const extend = require("extend");
 
 class Utils {
     static getRoomConfigsForTarget(emailAddress, source) {
         let configs = [];
-        log.info("utils", "getRoomConfigsForTarget - Start lookup for " + emailAddress + " source: " + source);
+        LogService.info("utils", "getRoomConfigsForTarget - Start lookup for " + emailAddress + " source: " + source);
         let customMapping = config.get("customMailTargets")[emailAddress];
         if (!customMapping) {
-            log.info("utils", "getRoomConfigsForTarget - No custom mapping for " + emailAddress);
+            LogService.info("utils", "getRoomConfigsForTarget - No custom mapping for " + emailAddress);
             const mailDomain = config.get("mail.domain");
 
             if (emailAddress.endsWith('@' + mailDomain)) {
@@ -25,11 +25,11 @@ class Utils {
         }
 
         if (configs.length === 0) {
-            log.warn("utils", "getRoomConfigsForTarget - No room configs found for " + emailAddress);
+            LogService.warn("utils", "getRoomConfigsForTarget - No room configs found for " + emailAddress);
             return null;
-        } else log.info("utils", "getRoomConfigsForTarget - Found " + configs.length + " configurations");
+        } else LogService.info("utils", "getRoomConfigsForTarget - Found " + configs.length + " configurations");
 
-        log.info("utils", "getRoomConfigsForTarget - Checking cc, bcc, and to for " + emailAddress);
+        LogService.info("utils", "getRoomConfigsForTarget - Checking cc, bcc, and to for " + emailAddress);
         const newConfigs = [];
         for (let roomConfig of configs) {
             if (source === "cc" && !roomConfig['useCcAsTarget']) continue;
@@ -39,16 +39,16 @@ class Utils {
         }
         configs = newConfigs;
 
-        log.info("utils", "getRoomConfigForTarget - Sender allowed, returning " + newConfigs.length + " configs");
+        LogService.info("utils", "getRoomConfigForTarget - Sender allowed, returning " + newConfigs.length + " configs");
         return configs;
     }
 
     static getRoomConfig(roomId) {
-        log.info("utils", "getRoomConfig - Lookup " + roomId);
+        LogService.info("utils", "getRoomConfig - Lookup " + roomId);
         const defaults = config.get("defaultRoomConfig");
         let overrides = config.get("roomConfigs")[roomId];
         if (!overrides) {
-            log.warn("utils", "getRoomConfig - No configuration for room " + roomId);
+            LogService.warn("utils", "getRoomConfig - No configuration for room " + roomId);
             return null;
         }
 
