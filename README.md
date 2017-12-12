@@ -1,8 +1,6 @@
 # matrix-email-bot
 
 [![TravisCI badge](https://travis-ci.org/turt2live/matrix-email-bot.svg?branch=master)](https://travis-ci.org/turt2live/matrix-email-bot)
-[![Targeted for next release](https://badge.waffle.io/turt2live/matrix-email-bot.png?label=sorted&title=Targeted+for+next+release)](https://waffle.io/turt2live/waffle-matrix?utm_source=badge) 
-[![WIP](https://badge.waffle.io/turt2live/matrix-email-bot.png?label=wip&title=WIP)](https://waffle.io/turt2live/waffle-matrix?utm_source=badge)
 
 A bot that posts messages to rooms when an email is received. Ideal for uses where a short message is desired in a chat room when a newsletter goes out.
 
