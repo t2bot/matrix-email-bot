@@ -57,7 +57,7 @@ if (loggingConfig.console) {
     }));
 }
 
-var log = new winston.Logger({
+var log = winston.createLogger({
     transports: transports,
     levels: {
         error: 0,
