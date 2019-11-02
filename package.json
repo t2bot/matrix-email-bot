@@ -15,7 +15,7 @@
     "express": "^4.17.0",
     "extend": "^3.0.2",
     "js-yaml": "^3.13.1",
-    "lodash": "^4.17.11",
+    "lodash": "^4.17.13",
     "mailin": "^3.0.4",
     "mailparser": "^2.7.1",
     "matrix-js-sdk": "^1.2.0-rc.1",
