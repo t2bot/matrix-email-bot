@@ -23,7 +23,7 @@
     "node-email-reply-parser": "^0.1.1",
     "pug": "^3.0.1",
     "request": "^2.88.0",
-    "sanitize-html": "^1.20.1",
+    "sanitize-html": "^2.3.2",
     "sqlite3": "^4.0.8",
     "streamifier": "^0.1.1",
     "striptags": "^3.1.1",
