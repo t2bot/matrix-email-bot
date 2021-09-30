@@ -1,7 +1,5 @@
 # matrix-email-bot
 
-[![TravisCI badge](https://travis-ci.org/turt2live/matrix-email-bot.svg?branch=master)](https://travis-ci.org/turt2live/matrix-email-bot)
-
 A bot that posts messages to rooms when an email is received. Ideal for uses where a short message is desired in a chat room when a newsletter goes out.
 
 Questions? Ask away in [#email:t2bot.io](https://matrix.to/#/#email:t2bot.io)
@@ -40,7 +38,7 @@ The bot runs best on port 25 to receive all incoming mail to your server. The bo
 
 If mail is currently being managed for your domain, or you'd like to filter the incoming mail in a more intelligent manner before it reaches the bot, set `enabled` to `false` under `mail` in the configuration file. This will disable the default SMTP listener on the bot.
 
-The existing mail server will need to be configured to run an external program so mail can be sent to the bot. Have the mail server run `node post_message.js` in the bot's directory to post a message from the standard input pipe. If the email is in file form, use the following syntax: `node post_message.js path/to/file.eml`. 
+The existing mail server will need to be configured to run an external program so mail can be sent to the bot. Have the mail server run `node post_message.js` in the bot's directory to post a message from the standard input pipe. If the email is in file form, use the following syntax: `node post_message.js path/to/file.eml`.
 
 ## Subscribing to mailing lists
 
