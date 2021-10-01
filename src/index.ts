@@ -9,7 +9,7 @@ import {
 } from "matrix-bot-sdk";
 import config from "./config";
 import * as path from "path";
-import { DataStore } from "./storage/DataStore";
+import { DataStore } from "./DataStore";
 import { SqliteCryptoStorageProvider } from "matrix-bot-sdk/lib/storage/SqliteCryptoStorageProvider";
 import { MatrixBot } from "./MatrixBot";
 import * as fs from "fs";

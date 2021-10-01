@@ -48,12 +48,24 @@ export class DataStore {
     }
 
     public async getMessage(id: string): Promise<IDbMessage> {
-        return this.selectById.get({id});
+        const res = this.selectById.get({id});
+        if (res) {
+            return {
+                ...res,
+                is_html: Boolean(res.is_html),
+            };
+        }
+        return null;
     }
 
     public async writeMessage(message: IDbMessage): Promise<string> {
         const id = uuid.v4();
-        this.insertMessage.run({...message, id, received_timestamp: Date.now()});
+        this.insertMessage.run({
+            ...message,
+            is_html: message.is_html ? 1 : 0,
+            id: id,
+            received_timestamp: Date.now(),
+        });
         return id;
     }
 

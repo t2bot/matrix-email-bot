@@ -1,5 +1,5 @@
 import { MatrixBot } from "./MatrixBot";
-import { DataStore, IDbAttachment, IDbMessage } from "./storage/DataStore";
+import { DataStore, IDbAttachment, IDbMessage } from "./DataStore";
 import config from "./config";
 import * as mailin from "mailin";
 import { getRoomConfigsForTarget } from "./configUtils";

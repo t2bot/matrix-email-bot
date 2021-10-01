@@ -1,4 +1,4 @@
-import { DataStore } from "./storage/DataStore";
+import { DataStore } from "./DataStore";
 import { EmailProcessor } from "./EmailProcessor";
 import { Express } from "express";
 import * as express from "express";

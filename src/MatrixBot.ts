@@ -3,7 +3,7 @@ import { MessageType } from "./MessageType";
 import { getRoomConfig } from "./configUtils";
 import * as sanitizeHtml from "sanitize-html";
 import * as striptags from "striptags";
-import { IDbMessage } from "./storage/DataStore";
+import { IDbMessage } from "./DataStore";
 
 // Much of this is based off of matrix-react-sdk's HtmlUtils
 // https://github.com/matrix-org/matrix-react-sdk/blob/41936a957fdc5250d7c6c68d87ea4b21896080b0/src/HtmlUtils.js#L83-L140
