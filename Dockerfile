@@ -14,6 +14,7 @@ COPY --from=builder /tmp/src/lib /app
 COPY --from=builder /tmp/src/config /app/config
 COPY --from=builder /tmp/src/package.json /app/package.json
 COPY --from=builder /tmp/src/yarn.lock /app/yarn.lock
+COPY --from=builder /tmp/src/views /app/views
 
 RUN yarn install --production && chown -R node /app && chown -R node /data
 
