@@ -1,5 +1,5 @@
 # The configuration for the matrix portion of the bot. The bot's matrix account must already
-# be created proiot to running the bot.
+# be created prior to running the bot.
 matrix:
   # The homeserver URL for the bot. For example, https://matrix.org
   homeserverUrl: "https://t2bot.io"
@@ -7,8 +7,9 @@ matrix:
   # The access token for the bot that authenticates it on the above homeserver.
   accessToken: "YOUR_TOKEN_HERE"
 
-  # The Matrix ID for the bot's account. For example, @email:t2bot.io
-  userId: "@email:t2bot.io"
+  # Where to store misc information kept by the bot, including the bot's internal
+  # database.
+  storagePath: "/data/storage"
 
 # The mail server configuration.
 mail:
@@ -162,13 +163,3 @@ roomConfigs:
     - "myemail@domain.com"
     blockedSenders:
     - "that_guy@domain.com"
-
-# Settings for controlling how logging works
-logging:
-  file: logs/emailbot.log
-  console: true
-  consoleLevel: info
-  fileLevel: verbose
-  rotate:
-    size: 52428800 # bytes, default is 50mb
-    count: 5
