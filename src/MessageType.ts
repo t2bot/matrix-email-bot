@@ -1,4 +1,4 @@
 export enum MessageType {
-    Primary = "primary",
+    Primary = "message",
     Fragment = "fragment",
 }
