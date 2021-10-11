@@ -6,15 +6,12 @@ interface IAnnotatedRoomConfig extends IRoomConfig {
 
 export function getRoomConfig(roomId: string): IAnnotatedRoomConfig {
     const defaults = config.defaultRoomConfig;
+    console.log('@@ ', roomId);
     let overrides = config.roomConfigs[roomId];
     if (!overrides) {
         return null;
     }
-    return JSON.parse(JSON.stringify({
-        roomId,
-        ...defaults,
-        ...overrides,
-    }));
+    return Object.assign({}, {roomId}, defaults, overrides) as IAnnotatedRoomConfig;
 }
 
 export function getRoomConfigsForTarget(emailAddress: string, source: "cc" | "bcc" | "to"): IAnnotatedRoomConfig[] {

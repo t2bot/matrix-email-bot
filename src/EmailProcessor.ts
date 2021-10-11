@@ -123,7 +123,6 @@ export class EmailProcessor {
                 if (roomConfig.postReplies) {
                     textSegments = replyParser(textBody).getFragments().map(f => f.getContent());
                 } else {
-                    // @ts-ignore
                     textSegments = [replyParser(textBody, true)];
                 }
 
@@ -149,13 +148,15 @@ export class EmailProcessor {
                 let msgType = MessageType.Primary;
 
                 for (const message of dbMessages) {
-                    await this.bot.sendMessage(message, roomConfig.roomId, msgType);
-                    msgType = MessageType.Fragment;
-
+                    let msg = message;
                     if (!roomConfig.skipDatabase) {
                         const messageId = await this.db.writeMessage(message);
                         await this.db.writeAttachments(attachments, messageId);
+                        msg = await this.db.getMessage(messageId);
                     }
+
+                    await this.bot.sendMessage(msg, roomConfig.roomId, msgType);
+                    msgType = MessageType.Fragment;
                 }
                 for (const attachment of attachments) {
                     if (!attachment.post) continue;

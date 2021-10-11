@@ -35,7 +35,9 @@ export class MatrixBot {
     }
 
     public async sendMessage(message: IDbMessage, roomId: string, messageType = MessageType.Primary) {
+        console.log(messageType);
         const roomConfig = getRoomConfig(roomId);
+        if (!roomConfig) return;
 
         let messageFormat = roomConfig.messageFormat;
         if (messageType !== MessageType.Primary) {
