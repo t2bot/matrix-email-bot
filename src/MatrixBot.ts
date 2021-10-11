@@ -35,7 +35,6 @@ export class MatrixBot {
     }
 
     public async sendMessage(message: IDbMessage, roomId: string, messageType = MessageType.Primary) {
-        console.log(messageType);
         const roomConfig = getRoomConfig(roomId);
         if (!roomConfig) return;
 
@@ -76,7 +75,7 @@ export class MatrixBot {
 
         if (!roomConfig.plaintextOnly) {
             content["body"] = plainFormat || striptags(content.body);
-            content["formatted_body"] = message.html_body.replace(/\n/g, '<br/>'); // clients are expected to sanitize this
+            content["formatted_body"] = messageFormat.replace(/\n/g, '<br/>'); // clients are expected to sanitize this
             content["format"] = "org.matrix.custom.html";
         }
 

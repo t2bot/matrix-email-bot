@@ -6,7 +6,6 @@ interface IAnnotatedRoomConfig extends IRoomConfig {
 
 export function getRoomConfig(roomId: string): IAnnotatedRoomConfig {
     const defaults = config.defaultRoomConfig;
-    console.log('@@ ', roomId);
     let overrides = config.roomConfigs[roomId];
     if (!overrides) {
         return null;
