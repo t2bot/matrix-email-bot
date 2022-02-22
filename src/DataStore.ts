@@ -53,6 +53,7 @@ export class DataStore {
             return {
                 ...res,
                 is_html: Boolean(res.is_html),
+                html_body: Boolean(res.html_body) ? res.html_body : res.full_text_body.replace(/(\r\n|\r|\n)/g, '<br>'),
             };
         }
         return null;
