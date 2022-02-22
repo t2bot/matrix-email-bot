@@ -63,6 +63,7 @@ export class DataStore {
         this.insertMessage.run({
             ...message,
             is_html: message.is_html ? 1 : 0,
+            html_body: message.html_body ? message.html_body : "",
             id: id,
             received_timestamp: Date.now(),
         });
