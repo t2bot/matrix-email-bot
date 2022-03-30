@@ -13,7 +13,7 @@ export function getRoomConfig(roomId: string): IAnnotatedRoomConfig {
     return Object.assign({}, {roomId}, defaults, overrides) as IAnnotatedRoomConfig;
 }
 
-export function getRoomConfigsForTarget(emailAddress: string, source: "cc" | "bcc" | "to"): IAnnotatedRoomConfig[] {
+export function getRoomConfigsForTarget(emailAddress: string, source: "cc" | "bcc" | "to" | "envelope"): IAnnotatedRoomConfig[] {
     const configs: IAnnotatedRoomConfig[] = [];
     const customMapping = config.customMailTargets[emailAddress];
     if (!customMapping) {
@@ -41,6 +41,7 @@ export function getRoomConfigsForTarget(emailAddress: string, source: "cc" | "bc
         if (source === "cc" && !roomConfig.useCcAsTarget) continue;
         if (source === "bcc" && !roomConfig.useBccAsTarget) continue;
         if (source === "to" && !roomConfig.useToAsTarget) continue;
+        if (source === "envelope" && !roomConfig.useEnvelopeToAsTarget) continue;
         freshConfigs.push(roomConfig);
     }
 

@@ -8,6 +8,7 @@ export interface IRoomConfig {
     useCcAsTarget: boolean;
     useBccAsTarget: boolean;
     useToAsTarget: boolean;
+    useEnvelopeToAsTarget: boolean;
     plaintextOnly: boolean;
     attachments: {
         post: boolean;

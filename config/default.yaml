@@ -75,6 +75,10 @@ defaultRoomConfig:
   # If true, the To header will be searched for valid targets (rooms).
   useToAsTarget: true
 
+  # If true, the Received header will be searched for valid targets (rooms).
+  # Useful for redirected emails (as used by sieve or mailman).
+  useEnvelopeToAsTarget: false
+
   # If true, the bot won't post an HTML message to the Matrix room, instead posting a plain
   # text message. It is recommended to use $text_body in your formatting to avoid HTML tags
   # being posted in the rough to the room.

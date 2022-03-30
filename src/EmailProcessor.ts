@@ -9,7 +9,7 @@ import { MessageType } from "./MessageType";
 interface IEmailTarget {
     address: string;
     name: string;
-    source: "to" | "cc" | "bcc";
+    source: "to" | "cc" | "bcc" | "envelope";
 }
 
 export class EmailProcessor {
@@ -36,6 +36,15 @@ export class EmailProcessor {
         for (const email of (message.to || [])) targets.push({address: email.address, name: email.name, source: 'to'});
         for (const email of (message.cc || [])) targets.push({address: email.address, name: email.name, source: 'cc'});
         for (const email of (message.bcc || [])) targets.push({address: email.address, name: email.name, source: 'bcc'});
+        for (const header of (message.headerLines || [])) {
+            if (header.key == 'received') {
+                const regex = /for <(.*)>/;
+                const email = header.line.match(regex);
+                if (email) {
+                    targets.push({address: email[1], name: '', source: 'envelope'});
+                }
+            }
+        }
 
         const primaryFrom = message.from[0];
 
