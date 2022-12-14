@@ -13,7 +13,7 @@
   "dependencies": {
     "better-sqlite3": "^7.4.3",
     "config": "^3.3.6",
-    "express": "^4.17.1",
+    "express": "^4.17.3",
     "js-yaml": "^4.1.0",
     "mailin": "^3.0.4",
     "mailparser": "^3.3.1",
