@@ -1,7 +1,7 @@
 import { MatrixBot } from "./MatrixBot";
 import { DataStore, IDbAttachment, IDbMessage } from "./DataStore";
 import config from "./config";
-import * as mailin from "mailin";
+import * as mailin from "@umpacken/node-mailin";
 import { getRoomConfigsForTarget } from "./configUtils";
 import * as replyParser from "node-email-reply-parser";
 import { MessageType } from "./MessageType";
@@ -16,8 +16,7 @@ export class EmailProcessor {
     public constructor(private bot: MatrixBot, private db: DataStore) {
         if (config.mail.enabled) {
             mailin.start({
-                port: config.mail.port,
-                disableWebhook: true,
+                port: config.mail.port
             });
 
             mailin.on('message', (connection, data, content) => {
@@ -33,11 +32,11 @@ export class EmailProcessor {
 
         const targets: IEmailTarget[] = [];
 
-        for (const email of (message.to || [])) targets.push({ address: email.address.toLowerCase(), name: email.name, source: 'to' });
+        for (const email of (message.to.value || [])) targets.push({ address: email.address.toLowerCase(), name: email.name, source: 'to' });
         for (const email of (message.cc || [])) targets.push({ address: email.address.toLowerCase(), name: email.name, source: 'cc' });
         for (const email of (message.bcc || [])) targets.push({ address: email.address.toLowerCase(), name: email.name, source: 'bcc' });
 
-        const primaryFrom = message.from[0];
+        const primaryFrom = message.from.value[0];
 
         const rooms: string[] = [];
         for (const target of targets) {
@@ -67,7 +66,7 @@ export class EmailProcessor {
 
                 let allowed = true;
                 if (!roomConfig.allowFromAnyone) {
-                    for (const fromAddress of message.from) {
+                    for (const fromAddress of message.from.value) {
                         if (!fromAddress.address) continue;
 
                         if (!roomConfig.allowedSenders.includes(fromAddress.address.toLowerCase())) {
@@ -77,7 +76,7 @@ export class EmailProcessor {
                     }
                 }
 
-                for (const fromAddress of message.from) {
+                for (const fromAddress of message.from.value) {
                     if (!fromAddress.address) continue;
 
                     if (roomConfig.blockedSenders.includes(fromAddress.address.toLowerCase())) {
