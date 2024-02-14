@@ -10,7 +10,7 @@ import {
 import config from "./config";
 import * as path from "path";
 import { DataStore } from "./DataStore";
-import { SqliteCryptoStorageProvider } from "matrix-bot-sdk/lib/storage/SqliteCryptoStorageProvider";
+import { RustSdkCryptoStorageProvider } from "matrix-bot-sdk/lib/storage/RustSdkCryptoStorageProvider";
 import { MatrixBot } from "./MatrixBot";
 import * as fs from "fs";
 import { EmailProcessor } from "./EmailProcessor";
@@ -25,7 +25,7 @@ const client = new MatrixClient(
     config.matrix.homeserverUrl,
     config.matrix.accessToken,
     new SimpleFsStorageProvider(path.join(config.matrix.storagePath, "bot.json")),
-    new SqliteCryptoStorageProvider(path.join(config.matrix.storagePath, "crypto.db")),
+    new RustSdkCryptoStorageProvider(path.join(config.matrix.storagePath, "crypto.db")),
 );
 AutojoinRoomsMixin.setupOnClient(client);
 
