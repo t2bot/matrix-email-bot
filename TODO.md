@@ -1,13 +1,19 @@
 # To Do List
+## Quad 1
+* Improve logging
+* Added logging level configurability
+* Identify reasons for crashes
 
+## Quad 2
 * Replace node-mailin
-* Add smtp client functionality
 * work with upstream to replace deprecated modules in matrix-bot-sdk
   * request
   * request-promise
-* Improve logging
-* Added logging level configurability
-* Added bot registration functionality
-* Identify reasons for crashes
-* Fix issue with attachments
+
+## Quad 3
 * Added the capture of problem emails
+* Added bot registration functionality
+* Fix issue with attachments
+
+## Quad 4
+* Add smtp client functionality
