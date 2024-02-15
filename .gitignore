@@ -57,3 +57,5 @@ jspm_packages
 # yarn
 yarn.lock
 yarn-error.log
+
+config/dev.yaml
